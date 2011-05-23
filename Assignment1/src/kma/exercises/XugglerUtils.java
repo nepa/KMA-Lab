@@ -66,7 +66,6 @@ public class XugglerUtils {
 		 * 3. Set the 'inputFilePath' variable to the complete file path of each of your 
 		 *    downloaded sample media files and then run the 'main' method.
 		 */
-
 		log.info("Your JVM is running on " + System.getProperty("sun.arch.data.model") + " Bit.");
 		
 		// Check arguments passed to application
