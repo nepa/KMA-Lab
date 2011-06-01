@@ -6,6 +6,8 @@ import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import de.uniluebeck.itm.kma.xuggler.FileAnalyzer;
+import de.uniluebeck.itm.kma.xuggler.FileConverter;
 
 /**
  * Simple Media Converter application, as requested in
@@ -20,6 +22,9 @@ public class MediaConverterUI extends JFrame
 
   /** Input file object */
   private File inputFile = null;
+
+  /** Output file object */
+  private File outputFile = null;
 
   /** FileAnalyzer object */
   private FileAnalyzer fileAnalyzer = null;
@@ -75,7 +80,7 @@ public class MediaConverterUI extends JFrame
     setTitle("Media Converter");
     setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
     setLocationByPlatform(true);
-    setMinimumSize(new java.awt.Dimension(793, 458));
+    setMinimumSize(new java.awt.Dimension(793, 493));
 
     InputPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Input file"));
 
@@ -127,13 +132,13 @@ public class MediaConverterUI extends JFrame
       LogPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
       .addGroup(LogPanelLayout.createSequentialGroup()
         .addContainerGap()
-        .addComponent(ScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 181, Short.MAX_VALUE)
+        .addComponent(ScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 203, Short.MAX_VALUE)
         .addContainerGap())
     );
 
     FileFormatPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Change file format"));
 
-    FileFormatComboBox.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+    FileFormatComboBox.setModel(new javax.swing.DefaultComboBoxModel(new String[] { ".wav", ".mp3", ".mpeg", ".avi", ".mov", ".ogg", ".au", ".mp2", ".mp4" }));
 
     javax.swing.GroupLayout FileFormatPanelLayout = new javax.swing.GroupLayout(FileFormatPanel);
     FileFormatPanel.setLayout(FileFormatPanelLayout);
@@ -141,7 +146,7 @@ public class MediaConverterUI extends JFrame
       FileFormatPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
       .addGroup(FileFormatPanelLayout.createSequentialGroup()
         .addContainerGap()
-        .addComponent(FileFormatComboBox, 0, 323, Short.MAX_VALUE)
+        .addComponent(FileFormatComboBox, 0, 482, Short.MAX_VALUE)
         .addContainerGap())
     );
     FileFormatPanelLayout.setVerticalGroup(
@@ -149,10 +154,18 @@ public class MediaConverterUI extends JFrame
       .addGroup(FileFormatPanelLayout.createSequentialGroup()
         .addContainerGap()
         .addComponent(FileFormatComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        .addContainerGap(25, Short.MAX_VALUE))
     );
 
     VolumePanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Adjust volume"));
+
+    VolumeSlider.setMajorTickSpacing(50);
+    VolumeSlider.setMaximum(200);
+    VolumeSlider.setMinorTickSpacing(10);
+    VolumeSlider.setPaintLabels(true);
+    VolumeSlider.setPaintTicks(true);
+    VolumeSlider.setValue(100);
+    VolumeSlider.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
 
     javax.swing.GroupLayout VolumePanelLayout = new javax.swing.GroupLayout(VolumePanel);
     VolumePanel.setLayout(VolumePanelLayout);
@@ -160,7 +173,7 @@ public class MediaConverterUI extends JFrame
       VolumePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
       .addGroup(VolumePanelLayout.createSequentialGroup()
         .addContainerGap()
-        .addComponent(VolumeSlider, javax.swing.GroupLayout.DEFAULT_SIZE, 366, Short.MAX_VALUE)
+        .addComponent(VolumeSlider, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
         .addContainerGap())
     );
     VolumePanelLayout.setVerticalGroup(
@@ -168,7 +181,7 @@ public class MediaConverterUI extends JFrame
       .addGroup(VolumePanelLayout.createSequentialGroup()
         .addContainerGap()
         .addComponent(VolumeSlider, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-        .addContainerGap(20, Short.MAX_VALUE))
+        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
     );
 
     FileMenu.setText("File");
@@ -209,14 +222,14 @@ public class MediaConverterUI extends JFrame
     getContentPane().setLayout(layout);
     layout.setHorizontalGroup(
       layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-      .addGroup(layout.createSequentialGroup()
+      .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
         .addContainerGap()
-        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-          .addComponent(LogPanel, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-          .addComponent(InputPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-          .addGroup(layout.createSequentialGroup()
-            .addComponent(FileFormatPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+          .addComponent(LogPanel, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+          .addComponent(InputPanel, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+          .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
+            .addComponent(FileFormatPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+            .addGap(18, 18, 18)
             .addComponent(VolumePanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
         .addContainerGap())
     );
@@ -228,10 +241,10 @@ public class MediaConverterUI extends JFrame
         .addGap(18, 18, 18)
         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
           .addComponent(FileFormatPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-          .addComponent(VolumePanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+          .addComponent(VolumePanel, javax.swing.GroupLayout.DEFAULT_SIZE, 86, Short.MAX_VALUE))
         .addGap(18, 18, 18)
-        .addComponent(LogPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-        .addContainerGap())
+        .addComponent(LogPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
     );
 
     pack();
@@ -300,7 +313,7 @@ public class MediaConverterUI extends JFrame
         FileNameTextField.setText(this.inputFile.getName());
 
         // Analyse media file
-        fileAnalyzer.analyzeMediafile(this.inputFile.getAbsolutePath());
+        fileAnalyzer.analyzeMediafile(this.inputFile.getPath());
       }
     }
   }
@@ -315,17 +328,52 @@ public class MediaConverterUI extends JFrame
    */
     private void SaveActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_SaveActionPerformed
     {//GEN-HEADEREND:event_SaveActionPerformed
-      int returnValue = OutputFileChooser.showOpenDialog(this);
+      OutputFileChooser.setSelectedFile(this.inputFile);
+      int returnValue = OutputFileChooser.showSaveDialog(this);
 
       // Check whether valid file name was provided
       if (returnValue == JFileChooser.APPROVE_OPTION)
       {
         // Create output file
-        File outputFile = new File(OutputFileChooser.getSelectedFile().getAbsolutePath());
+        outputFile = new File(OutputFileChooser.getSelectedFile().getPath());
 
-        // TODO write output file
+        Thread thread = new Thread(new Runnable()
+        {
+          public void run()
+          {
+            LOGGER.info("Converter running...");
+            MediaConverterUI.this.swapElementEnabled();
+
+
+            String input = MediaConverterUI.this.inputFile.getPath();
+            String fileExtension = input.substring(input.lastIndexOf("."));
+            String temp1 = MediaConverterUI.this.outputFile.getPath() + "_volume" + fileExtension;
+            String temp2 = MediaConverterUI.this.outputFile.getPath() + "_resampled" + fileExtension;
+            String output = MediaConverterUI.this.outputFile.getPath() + FileFormatComboBox.getSelectedItem().toString();
+
+            FileConverter.adjustVolume(input, temp1, VolumeSlider.getValue() / (double)100);
+            FileConverter.resampleAudio(temp1, temp2, 8000, 2);
+            FileConverter.transcode(temp2, output);
+
+            File f = new File(temp1); f.delete();
+            f = new File(temp2); f.delete();
+
+            MediaConverterUI.this.swapElementEnabled();
+          }
+        });
+        //thread.run(); // Run and wait until thread is finished
+        thread.start(); // Continue immediately
       }
     }//GEN-LAST:event_SaveActionPerformed
+
+  public void swapElementEnabled()
+  {
+    SelectFileButton.setEnabled(!SelectFileButton.isEnabled());
+    VolumeSlider.setEnabled(!VolumeSlider.isEnabled());
+    FileFormatComboBox.setEnabled(!FileFormatComboBox.isEnabled());
+    Open.setEnabled(!Open.isEnabled());
+    Save.setEnabled(!Save.isEnabled());
+  }
 
   /**
    * Media Converter application.
@@ -343,7 +391,6 @@ public class MediaConverterUI extends JFrame
       }
     });
   }
-
   // Variables declaration - do not modify//GEN-BEGIN:variables
   private javax.swing.JMenuItem Exit;
   private javax.swing.JComboBox FileFormatComboBox;

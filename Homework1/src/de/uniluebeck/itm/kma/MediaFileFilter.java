@@ -22,11 +22,15 @@ class MediaFileFilter extends FileFilter
   public boolean accept(File file)
   {
     return file.isDirectory()
-            || file.getAbsolutePath().endsWith(".mp3")
             || file.getAbsolutePath().endsWith(".wav")
-            || file.getAbsolutePath().endsWith(".avi")
+            || file.getAbsolutePath().endsWith(".mp3")
             || file.getAbsolutePath().endsWith(".mpeg")
-            || file.getAbsolutePath().endsWith(".mov");
+            || file.getAbsolutePath().endsWith(".avi")
+            || file.getAbsolutePath().endsWith(".mov")
+            || file.getAbsolutePath().endsWith(".ogg")
+            || file.getAbsolutePath().endsWith(".au")
+            || file.getAbsolutePath().endsWith(".mp2")
+            || file.getAbsolutePath().endsWith(".mp4");
   }
 
   /**
@@ -39,6 +43,6 @@ class MediaFileFilter extends FileFilter
   public String getDescription()
   {
     // No localization supported here :)
-    return "Media files (*.mp3/*.wav/*.avi/*.mpeg/*.mov)";
+    return "Media files (extension is ignored)";
   }
 }

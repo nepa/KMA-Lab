@@ -1,4 +1,4 @@
-package de.uniluebeck.itm.kma;
+package de.uniluebeck.itm.kma.xuggler;
 
 import com.xuggle.xuggler.Global;
 import com.xuggle.xuggler.ICodec;
@@ -14,6 +14,12 @@ import com.xuggle.xuggler.IStreamCoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Analyzer for multimedia files. Outputs information to
+ * a predefined JTextPane as plain text.
+ *
+ * @author seidel
+ */
 public class FileAnalyzer
 {
   /** Logger object for debug output */
@@ -27,7 +33,7 @@ public class FileAnalyzer
    *
    * @param logPane JTextPane object
    */
-  FileAnalyzer(JTextPane logPane)
+  public FileAnalyzer(JTextPane logPane)
   {
     this.logPane = logPane;
 
@@ -39,7 +45,7 @@ public class FileAnalyzer
 
   /**
    * Setter for logPane member.
-   * 
+   *
    * @param logPane JTextPane object
    */
   public void setLogPane(JTextPane logPane)
@@ -49,7 +55,7 @@ public class FileAnalyzer
 
   /**
    * Getter for logPane member.
-   * 
+   *
    * @return JTextPane object
    */
   public JTextPane getLogPane()
