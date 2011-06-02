@@ -10,9 +10,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * The WriterAudioResampler is used to configure the underlying IStreamCoder for an IMediaWriter
- * to a new sample rate. This class extends MediaToolAdapter and @Override(s) onAddStream to
- * gain access to the IAddStreamEvent, which is called during stream setup.
+ * Media tool for audio bitrate resampling. This class can change
+ * the sample rate of an audio stream and pass it to an IMediaWriter
+ * afterwards. WriteAudioResamplerTool overrides onAddStream from
+ * MediaToolAdapter to gain access to the IAddStreamEvent, which is
+ * called during stream setup.
  *
  * @author seidel
  */
@@ -21,67 +23,57 @@ public class WriteAudioResamplerTool extends MediaToolAdapter
   /** Logger object for debug output */
   private static final Logger LOGGER = LoggerFactory.getLogger(WriteAudioResamplerTool.class);
 
-  // Private data
+  /** Audio sample rate */
   private int sampleRate;
 
+  /** Amount of audio channels */
   private int channels;
 
-  // AudioResampler constructor
+  /**
+   * Constructor sets audio sample rate and amount of channels.
+   *
+   * @param newSampleRate Audio sample rate
+   * @param newChannels Amount of channels
+   */
   public WriteAudioResamplerTool(int newSampleRate, int newChannels)
   {
     this.sampleRate = newSampleRate;
     this.channels = newChannels;
-    LOGGER.info("Created an WriterAudioResampler: {}/{}", newSampleRate, newChannels);
+
+    LOGGER.info("WriteAudioResamplerTool created.");
+    LOGGER.info("New bitrate is " + this.sampleRate + " Bit/s. New channel count is " + this.channels + ".");
   }
 
-  /*
-   * @Override onAddStream
+  /**
+   * Event handler onAddStream is called by the MediaToolAdapter
+   * before any audio samples are processed. We need to configure
+   * the writer's IStreamCoder with the new bitrate, before we
+   * can resample the raw audio data.
    *
-   * Before we can re-sample raw audio data, we need to configure the writer's IStreamCoder
-   * with the new sample rate. The onAddStream method is called by the MediaToolAdapter
-   * before any audio samples are processed.
+   * @param event Add stream event
    */
   @Override
   public void onAddStream(IAddStreamEvent event)
   {
-    LOGGER.info("IAddStreamEvent: {}", event.getSource());
+    LOGGER.info("IAddStreamEvent fired: " + event.getSource());
 
-    /*
-     * -----------------------------------------------------------------------------------
-     * !!! LAB EXERCISE !!!
-     * -----------------------------------------------------------------------------------
-     *
-     * 1. Get the streamIndex for the newly added stream
-     *    Hint: use 'event.getStreamIndex()'
-     *
-     * 2. Get the IStreamCoder for the stream
-     *    Hint: First, get the source container with 'event.getSource().getContainer()'
-     *    Hint: Using the container, get stream with 'getStream(streamIndex)'
-     *    Hint: Using the stream, get the coder with 'getStreamCoder()'
-     *
-     * 3. Set the sample rate and channels on the obtained streamCoder
-     *    Hint: First, check if 'streamCoder.getCodecType() == ICodec.Type.CODEC_TYPE_AUDIO'
-     *    Hint: Set sample rate using 'streamCoder.setSampleRate' and 'this.sampleRate'
-     *    Hint: Set channels using 'streamCoder.setChannels' and 'this.channels'
-     */
-
-    // ===================================================================================
-    // *** YOUR CODE HERE ***
+    // Get stream index from event
     int streamIndex = event.getStreamIndex();
 
+    // Create container, get stream and build coder
     IContainer container = event.getSource().getContainer();
     IStream stream = container.getStream(streamIndex);
     IStreamCoder coder = stream.getStreamCoder();
 
+    // If stream is audio stream...
     if (coder.getCodecType().equals(ICodec.Type.CODEC_TYPE_AUDIO))
     {
+      // ... alter sample rate and amount of channels
       coder.setSampleRate(this.sampleRate);
-
       coder.setChannels(this.channels);
     }
-    // ===================================================================================
 
-    // Finally, pass the adjusted event to the next tool
+    // Pass adjusted event to next tool
     super.onAddStream(event);
   }
 }

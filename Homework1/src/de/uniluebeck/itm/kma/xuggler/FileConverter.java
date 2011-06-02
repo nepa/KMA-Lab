@@ -3,6 +3,9 @@ package de.uniluebeck.itm.kma.xuggler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.swing.JTextPane;
+import javax.swing.text.BadLocationException;
+
 import com.xuggle.mediatool.IMediaReader;
 import com.xuggle.mediatool.IMediaTool;
 import com.xuggle.mediatool.IMediaWriter;
@@ -11,6 +14,7 @@ import com.xuggle.xuggler.ICodec;
 import com.xuggle.xuggler.IContainer;
 import com.xuggle.xuggler.IPacket;
 import com.xuggle.xuggler.IStreamCoder;
+
 import de.uniluebeck.itm.kma.xuggler.tools.ReadAudioResamplerTool;
 import de.uniluebeck.itm.kma.xuggler.tools.VolumeAdjustTool;
 import de.uniluebeck.itm.kma.xuggler.tools.WriteAudioResamplerTool;
@@ -27,6 +31,58 @@ public class FileConverter
   /** Logger object for debug output */
   private static final Logger LOGGER = LoggerFactory.getLogger(FileConverter.class);
 
+  /** JTextPane object for analyzer output */
+  private JTextPane logPane;
+
+  /**
+   * Constructor sets logPane member.
+   *
+   * @param logPane JTextPane object
+   */
+  public FileConverter(JTextPane logPane)
+  {
+    this.logPane = logPane;
+  }
+
+  /**
+   * Setter for logPane member.
+   *
+   * @param logPane JTextPane object
+   */
+  public void setLogPane(JTextPane logPane)
+  {
+    this.logPane = logPane;
+  }
+
+  /**
+   * Getter for logPane member.
+   *
+   * @return JTextPane object
+   */
+  public JTextPane getLogPane()
+  {
+    return this.logPane;
+  }
+
+  /**
+   * Helper method for logging, provided for convenience.
+   *
+   * @param textToAppend Text to append to log pane
+   */
+  private void log(String textToAppend)
+  {
+    try
+    {
+      this.logPane.getDocument().insertString(this.logPane.getDocument().getLength(),
+              textToAppend + System.getProperty("line.separator"), null);
+      this.logPane.setCaretPosition(this.logPane.getDocument().getLength()); // Auto-scrolling
+    }
+    catch (BadLocationException e)
+    {
+      LOGGER.info(e.getMessage());
+    }
+  }
+
   /**
    * This method is used for volume adjustment. Third argument
    * is used as a multiplier to increase or decrease audio
@@ -36,9 +92,11 @@ public class FileConverter
    * @param outputFile Output file name
    * @param adjustmentAmount Amount of adjustment
    */
-  public static void adjustVolume(String intputFile, String outputFile, double adjustmentAmount)
+  public void adjustVolume(String intputFile, String outputFile, double adjustmentAmount)
   {
-    LOGGER.info("Adjusting volume by " + adjustmentAmount + "...");
+    this.log("============================================================");
+    this.log("");
+    this.log("Adjusting volume by " + adjustmentAmount + "...");
 
     // Create reader and writer object
     IMediaReader reader = ToolFactory.makeReader(intputFile);
@@ -65,31 +123,32 @@ public class FileConverter
     }
 
     // Safely close reader and writer
-    FileConverter.closeContainerSafely(reader.getContainer());
-    FileConverter.closeContainerSafely(writer.getContainer());
+    this.closeContainerSafely(reader.getContainer());
+    this.closeContainerSafely(writer.getContainer());
 
     // This will cause error here:
     //reader.close();
     //writer.close();
 
-    LOGGER.info("Volume adjustment completed.");
+    this.log("Volume adjustment completed.");
+    this.log("");
   }
 
   /**
    * This method is used for audio bitrate resampling. Just pass
    * new sampling rate and new channel count to alter input file.
    *
-   * @param intputFile Input file name
+   * @param inputFile Input file name
    * @param outputFile Output file name
    * @param newSampleRate New sample rate
    * @param newChannels New amount of channels
    */
-  public static void resampleAudio(String intputFile, String outputFile, int newSampleRate, int newChannels)
+  public void resampleAudio(String inputFile, String outputFile, int newSampleRate, int newChannels)
   {
-    LOGGER.info("Resampling audio bitrate to " + newSampleRate + " Hz (" + newChannels + " channels)...");
+    this.log("Resampling audio bitrate to " + newSampleRate + " Bit/s (" + newChannels + " channels)...");
 
     // Create reader and writer object
-    IMediaReader reader = ToolFactory.makeReader(intputFile);
+    IMediaReader reader = ToolFactory.makeReader(inputFile);
     IMediaWriter writer = ToolFactory.makeWriter(outputFile, reader);
 
     // Create resampler objects
@@ -115,14 +174,15 @@ public class FileConverter
     }
 
     // Safely close reader and writer
-    FileConverter.closeContainerSafely(reader.getContainer());
-    FileConverter.closeContainerSafely(writer.getContainer());
+    this.closeContainerSafely(reader.getContainer());
+    this.closeContainerSafely(writer.getContainer());
 
     // This will cause error here:
     //reader.close();
     //writer.close();
 
-    LOGGER.info("Audio resampling completed.");
+    this.log("Audio resampling completed.");
+    this.log("");
   }
 
   /**
@@ -135,9 +195,9 @@ public class FileConverter
    * @param inputFile Input file name
    * @param outputFile Output file name
    */
-  public static void transcode(String inputFile, String outputFile)
+  public void transcode(String inputFile, String outputFile)
   {
-    LOGGER.info("Transcoding input to new file format...");
+    this.log("Transcoding input to new file format...");
 
     // Create reader and writer object
     IMediaReader reader = ToolFactory.makeReader(inputFile);
@@ -160,14 +220,15 @@ public class FileConverter
     }
 
     // Safely close reader and writer
-    FileConverter.closeContainerSafely(reader.getContainer());
-    FileConverter.closeContainerSafely(writer.getContainer());
+    this.closeContainerSafely(reader.getContainer());
+    this.closeContainerSafely(writer.getContainer());
 
     // This will cause error here:
     //reader.close();
     //writer.close();
 
-    LOGGER.info("Transcoding finished.");
+    this.log("Transcoding finished.");
+    this.log("");
   }
 
   /**
@@ -177,10 +238,8 @@ public class FileConverter
    *
    * @param container IContainer object
    */
-  private static void closeContainerSafely(IContainer container)
+  private void closeContainerSafely(IContainer container)
   {
-    LOGGER.info("Closing container...");
-
     // Create local variables for Xuggler
     int i;
     int numStreams = container.getNumStreams();
@@ -238,7 +297,5 @@ public class FileConverter
     // Close container and free memory
     container.close();
     container = null;
-
-    LOGGER.info("Finished closing container.");
   }
 }

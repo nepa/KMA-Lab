@@ -5,63 +5,58 @@ import com.xuggle.mediatool.event.IAudioSamplesEvent;
 import java.nio.ShortBuffer;
 
 /**
- * The VolumeAdjustTool class adjusts the volume of audio by a constant multiplier (a percentage
- * value between 0 and 1). This class extends MediaToolAdapter and @Override(s) onAudioSamples
- * to gain access to IAudioSamplesEvent(s) during media processing.
+ * Media tool for volume adjustment. This class can increase or
+ * decrease the volume of an audio file by a constant multiplier.
+ * VolumeAdjustTool overrides onAudioSamples from MediaToolAdapter
+ * to gain access to IAudioSampleEvents during media processing.
  *
  * @author seidel
  */
 public class VolumeAdjustTool extends MediaToolAdapter
 {
-  // Private data
+  /** Multiplier for volume adjustment */
   private double multiplier;
 
-  // VolumeAdjustTool constructor
+  /**
+   * Constructor checks and sets volume multiplier. Argument
+   * must be value between 0.0 and 2.0 (where 1.0 denotes no
+   * change in volume at all).
+   *
+   * @param volumeMultiplier Volume multiplier
+   */
   public VolumeAdjustTool(double volumeMultiplier)
   {
-    if (volumeMultiplier < 0 || volumeMultiplier > 2)
+    // Check argument
+    if (volumeMultiplier < 0.0 || volumeMultiplier > 2.0)
     {
-      throw new IllegalArgumentException("must be between 0 and 2");
+      throw new IllegalArgumentException("Volume multiplier must be between 0 and 2.");
     }
-    multiplier = volumeMultiplier;
+
+    this.multiplier = volumeMultiplier;
   }
 
-  /*
-   * Override onAudioSamples to gain access to underlying IAudioSamples during media
-   * processing. Audio samples may be altered locally in this method and then passed to the
-   * superclass, which passes the altered data to additional IMediaListeners.
+  /**
+   * Event handler onAudioSamples gives access to the underlying
+   * IAudioSamples during media processing. This way audio samples
+   * may be altered locally and then passed to the superclass,
+   * which gives them to other IMediaListeners.
+   *
+   * @param event Audio samples event
    */
   @Override
   public void onAudioSamples(IAudioSamplesEvent event)
   {
-
-    /*
-     * -----------------------------------------------------------------------------------
-     * !!! LAB EXERCISE !!!
-     * -----------------------------------------------------------------------------------
-     * 1. Create a 'ShortBuffer' and point it to the incoming audio samples.
-     *    Hint: Use 'event.getAudioSamples().getByteBuffer().asShortBuffer()'
-     *
-     * 2. Loop over the buffer values from 0 to 'buffer.limit()' and access each buffer
-     *    value using 'buffer.get'
-     *    Hint: 'buffer.get' gets the sample values as a 'short'
-     *
-     * 3. Multiply each buffer value by the 'multiplier' (which is a double) then place the
-     *    resultant value back into the buffer using 'buffer.put'
-     *    Hint: You may need to cast the data to a 'short' value
-     */
-
-    // ===================================================================================
-    // *** YOUR CODE HERE ***
+    // Create buffer for incoming audio samples
     ShortBuffer buffer = event.getAudioSamples().getByteBuffer().asShortBuffer();
 
+    // Modify elements in buffer (here: multiply with constant
+    // value to increase or decrease audio volume)
     for (int i = 0; i < buffer.limit(); ++i)
     {
       buffer.put(i, (short)(buffer.get(i) * this.multiplier));
     }
-    // ===================================================================================
 
-    // Finally, pass the adjusted event to the next tool
+    // Pass adjusted event to next tool
     super.onAudioSamples(event);
   }
 }

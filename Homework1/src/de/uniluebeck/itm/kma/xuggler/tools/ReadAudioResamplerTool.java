@@ -9,10 +9,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * The ReaderAudioResampler is used to re-sample the incoming IAudioSamples. This class uses an
- * IAudioResampler to perform the actual re-sampling. This class extends MediaToolAdapter and
- * @Override(s) onAudioSamples to gain access to the IAudioSamplesEvent(s), which arrive as the
- * IMediaReader reads a stream.
+ * Media tool for audio bitrate resampling. This class uses
+ * an IAudioResampler to change the sample rate of an audio
+ * stream. ReadAudioResamplterTool overrides onAudioSamples
+ * from MediaToolAdapter to gain access to the IAudioSamplesEvent,
+ * which arrives as the IMediaReader reads a stream.
+ *
  * @author seidel
  */
 public class ReadAudioResamplerTool extends MediaToolAdapter
@@ -20,91 +22,68 @@ public class ReadAudioResamplerTool extends MediaToolAdapter
   /** Logger object for debug output */
   private static final Logger LOGGER = LoggerFactory.getLogger(ReadAudioResamplerTool.class);
 
-  // Private data
+  /** Audio resampler object */
   private IAudioResampler resampler;
 
+  /** Audio sample rate */
   private int sampleRate;
 
+  /** Amount of audio channels */
   private int channels;
 
-  // AudioResampler constructor
+  /**
+   * Constructor sets audio sample rate and amount of channels.
+   *
+   * @param newSampleRate Audio sample rate
+   * @param newChannels Amount of channels
+   */
   public ReadAudioResamplerTool(int newSampleRate, int newChannels)
   {
     this.sampleRate = newSampleRate;
     this.channels = newChannels;
-    LOGGER.info("Created an ReaderAudioResampler: {}/{}", newSampleRate, newChannels);
+
+    LOGGER.info("ReadAudioResamplerTool created.");
+    LOGGER.info("New bitrate is " + this.sampleRate + " Bit/s. New channel count is " + this.channels + ".");
   }
 
-  /*
-   * @Override onAudioSamples
+  /**
+   * Event handler onAudioSamples is called as IAudioSamples are
+   * read from the IMediaReader in the processing chain. The method
+   * argument contains the IAudioSamples from the underlying stream.
+   * Thus we can resample the data and pass it to the next
+   * IMediaListener in the tool chain.
    *
-   * As IAudioSamples are read from the IMediaReader in our processing chain, this method
-   * will be called with an IAudioSamplesEvent that contains the actual IAudioSamples from the
-   * underlying stream. This method re-samples the data contained within the event and passes
-   * the re-sampled data to the next IMediaListener in the chain.
+   * @param event Audio samples event
    */
   @Override
   public void onAudioSamples(IAudioSamplesEvent event)
   {
-
-    /*
-     * -----------------------------------------------------------------------------------
-     * !!! LAB EXERCISE !!!
-     * -----------------------------------------------------------------------------------
-     * 1. Grab the audio IAudioSamples from the incoming event
-     *    Hint: Use 'event.getAudioSamples()'
-     *
-     * 2. Create an IAudioResampler to handle re-sampling
-     *    Hint: Use 'IAudioResampler.make'
-     *    Hint: For performance reasons, only create the IAudioResampler once. Store your
-     *          instantiated IAudioSampler in 'this.resampler'.
-     *
-     * 3. Check if the event has more than zero samples
-     *    Hint: Use 'event.getAudioSamples().getNumSamples()'
-     *
-     * 4. Create a temporary IAudioSamples buffer to hold the re-sampled data
-     *    Hint: Use 'IAudioSamples.make' to create the buffer
-     *    Hint: Use the original IAudioSamples values for setting the
-     *          number of buffer's samples ('samples.getNumSamples()') and the number
-     *          of channels ('samples.getChannels()').
-     *
-     * 5. Use the IAudioResampler to re-sample the incoming samples, placing using the
-     *    temporary IAudioSamples buffer created above
-     *    Hint: Use 'resampler.resample'
-     *
-     * 6. Create a new AudioSamplesEvent using the IAudioSamples buffer as the
-     *    sample data.
-     *    Hint: For the event source, use 'event.getSource()'
-     *    Hint: For the stream index, use 'event.getStreamIndex()'
-     *
-     * 7. Pass this new AudioSamplesEvent to the superclass
-     *    Hint: Use 'super.onAudioSamples'
-     *
-     * 8. Delete the temporary IAudioSamples to reclaim resources
-     *    Hint: Use the IAudioSamples' 'delete()' method
-     */
-
-    // ===================================================================================
-    // *** YOUR CODE HERE ***
+    // Get audio samples
     IAudioSamples samples = event.getAudioSamples();
 
+    // Create resampler only once (for performance reasons)
     if (this.resampler == null)
     {
+      // Set old and new channel count/sample rate
       this.resampler = IAudioResampler.make(this.channels, samples.getChannels(), this.sampleRate, samples.getSampleRate());
     }
 
     if (samples.getNumSamples() > 0)
     {
+      // Create buffer for resampled data
       IAudioSamples temporarySamples = IAudioSamples.make(samples.getNumSamples(), samples.getChannels());
 
+      // Resample incoming data
       resampler.resample(temporarySamples, samples, samples.getNumSamples());
 
+      // Create new AudioSamplesEvent
       AudioSamplesEvent samplesEvent = new AudioSamplesEvent(event.getSource(), temporarySamples, event.getStreamIndex());
 
+      // Pass new event to next tool in chain
       super.onAudioSamples(samplesEvent);
 
+      // Release temporary buffer
       temporarySamples.delete();
     }
-    // ===================================================================================
   }
 }

@@ -74,6 +74,7 @@ public class FileAnalyzer
     {
       this.logPane.getDocument().insertString(this.logPane.getDocument().getLength(),
               textToAppend + System.getProperty("line.separator"), null);
+      this.logPane.setCaretPosition(this.logPane.getDocument().getLength()); // Auto-scrolling
     }
     catch (BadLocationException e)
     {
@@ -114,9 +115,9 @@ public class FileAnalyzer
     String duration = (container.getDuration() == Global.NO_PTS ? "unknown" : (container.getDuration() / 1000) + " ms");
     this.log("Duration: \t\t\t" + duration);
 
-    this.log("File size: \t\t\t" + container.getFileSize() + " bytes");
+    this.log("File size: \t\t\t" + container.getFileSize() + " Bytes");
 
-    this.log("Bit-rate: \t\t\t" + container.getBitRate());
+    this.log("Bitrate: \t\t\t" + container.getBitRate() + " Bit/s");
     this.log("");
 
     // Analyze streams
@@ -184,7 +185,7 @@ public class FileAnalyzer
     }
 
     // Close container and release resources
-    this.closeContainer(container);
+    this.closeContainerSafely(container);
   }
 
   /**
@@ -193,7 +194,7 @@ public class FileAnalyzer
    *
    * @param container IContainer object
    */
-  private void closeContainer(IContainer container)
+  private void closeContainerSafely(IContainer container)
   {
     // Create local variables for Xuggler
     int i;
