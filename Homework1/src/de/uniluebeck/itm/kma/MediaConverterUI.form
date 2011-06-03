@@ -104,7 +104,7 @@
                   <Group type="102" alignment="0" attributes="0">
                       <Component id="FileFormatPanel" pref="241" max="32767" attributes="0"/>
                       <EmptySpace type="separate" min="-2" max="-2" attributes="0"/>
-                      <Component id="BitratePanel" pref="266" max="32767" attributes="0"/>
+                      <Component id="SampleRatePanel" pref="266" max="32767" attributes="0"/>
                       <EmptySpace type="separate" min="-2" max="-2" attributes="0"/>
                       <Component id="VolumePanel" pref="226" max="32767" attributes="0"/>
                   </Group>
@@ -122,7 +122,7 @@
               <Group type="103" groupAlignment="1" max="-2" attributes="0">
                   <Component id="VolumePanel" max="32767" attributes="1"/>
                   <Component id="FileFormatPanel" alignment="0" max="32767" attributes="1"/>
-                  <Component id="BitratePanel" max="32767" attributes="1"/>
+                  <Component id="SampleRatePanel" max="32767" attributes="1"/>
               </Group>
               <EmptySpace type="separate" min="-2" max="-2" attributes="0"/>
               <Component id="LogPanel" max="32767" attributes="0"/>
@@ -328,11 +328,11 @@
         </Component>
       </SubComponents>
     </Container>
-    <Container class="javax.swing.JPanel" name="BitratePanel">
+    <Container class="javax.swing.JPanel" name="SampleRatePanel">
       <Properties>
         <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
           <Border info="org.netbeans.modules.form.compat2.border.TitledBorderInfo">
-            <TitledBorder title="Change bitrate"/>
+            <TitledBorder title="Change sample rate"/>
           </Border>
         </Property>
         <Property name="preferredSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
@@ -344,10 +344,10 @@
         <DimensionLayout dim="0">
           <Group type="103" groupAlignment="0" attributes="0">
               <Group type="102" alignment="1" attributes="0">
-                  <EmptySpace pref="26" max="32767" attributes="0"/>
-                  <Component id="BitrateSpinner" min="-2" pref="169" max="-2" attributes="0"/>
+                  <EmptySpace max="-2" attributes="0"/>
+                  <Component id="SampleRateSpinner" pref="196" max="32767" attributes="0"/>
                   <EmptySpace type="unrelated" max="-2" attributes="0"/>
-                  <Component id="BitrateLabel" min="-2" max="-2" attributes="0"/>
+                  <Component id="SampleRateLabel" min="-2" max="-2" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
               </Group>
           </Group>
@@ -357,8 +357,8 @@
               <Group type="102" alignment="0" attributes="0">
                   <EmptySpace max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="3" attributes="0">
-                      <Component id="BitrateLabel" alignment="3" min="-2" max="-2" attributes="0"/>
-                      <Component id="BitrateSpinner" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="SampleRateLabel" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="SampleRateSpinner" alignment="3" min="-2" max="-2" attributes="0"/>
                   </Group>
                   <EmptySpace pref="35" max="32767" attributes="0"/>
               </Group>
@@ -366,16 +366,24 @@
         </DimensionLayout>
       </Layout>
       <SubComponents>
-        <Component class="javax.swing.JSpinner" name="BitrateSpinner">
+        <Component class="javax.swing.JSpinner" name="SampleRateSpinner">
           <Properties>
             <Property name="model" type="javax.swing.SpinnerModel" editor="org.netbeans.modules.form.editors2.SpinnerModelEditor">
-              <SpinnerModel initial="44100" maximum="44100" minimum="800" numberType="java.lang.Integer" stepSize="100" type="number"/>
+              <SpinnerModel type="list">
+                <ListItem value="48000"/>
+                <ListItem value="44100"/>
+                <ListItem value="32000"/>
+                <ListItem value="22050"/>
+                <ListItem value="16000"/>
+                <ListItem value="11025"/>
+                <ListItem value="8000"/>
+              </SpinnerModel>
             </Property>
           </Properties>
         </Component>
-        <Component class="javax.swing.JLabel" name="BitrateLabel">
+        <Component class="javax.swing.JLabel" name="SampleRateLabel">
           <Properties>
-            <Property name="text" type="java.lang.String" value="Bit/s"/>
+            <Property name="text" type="java.lang.String" value="Hz"/>
           </Properties>
         </Component>
       </SubComponents>

@@ -21,8 +21,7 @@ import de.uniluebeck.itm.kma.xuggler.tools.WriteAudioResamplerTool;
 
 /**
  * Converter for multimedia files. Offers means for volume
- * adjustment, audio bitrate resampling and file type
- * transcoding.
+ * adjustment, audio resampling and file type transcoding.
  *
  * @author seidel
  */
@@ -135,8 +134,8 @@ public class FileConverter
   }
 
   /**
-   * This method is used for audio bitrate resampling. Just pass
-   * new sampling rate and new channel count to alter input file.
+   * This method is used for audio resampling. Just pass new
+   * sampling rate and new channel count to alter input file.
    *
    * @param inputFile Input file name
    * @param outputFile Output file name
@@ -145,7 +144,7 @@ public class FileConverter
    */
   public void resampleAudio(String inputFile, String outputFile, int newSampleRate, int newChannels)
   {
-    this.log("Resampling audio bitrate to " + newSampleRate + " Bit/s (" + newChannels + " channels)...");
+    this.log("Resampling audio to " + newSampleRate + " Hz (" + newChannels + " channels)...");
 
     // Create reader and writer object
     IMediaReader reader = ToolFactory.makeReader(inputFile);

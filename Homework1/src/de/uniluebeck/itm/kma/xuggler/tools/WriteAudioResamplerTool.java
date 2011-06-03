@@ -10,11 +10,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Media tool for audio bitrate resampling. This class can change
- * the sample rate of an audio stream and pass it to an IMediaWriter
- * afterwards. WriteAudioResamplerTool overrides onAddStream from
- * MediaToolAdapter to gain access to the IAddStreamEvent, which is
- * called during stream setup.
+ * Media tool for audio resampling. This class can change the sample
+ * rate of an audio stream and pass it to an IMediaWriter afterwards.
+ * WriteAudioResamplerTool overrides onAddStream from MediaToolAdapter
+ * to gain access to the IAddStreamEvent, which is called during
+ * stream setup.
  *
  * @author seidel
  */
@@ -41,13 +41,13 @@ public class WriteAudioResamplerTool extends MediaToolAdapter
     this.channels = newChannels;
 
     LOGGER.info("WriteAudioResamplerTool created.");
-    LOGGER.info("New bitrate is " + this.sampleRate + " Bit/s. New channel count is " + this.channels + ".");
+    LOGGER.info("New sample rate is " + this.sampleRate + " Hz. New channel count is " + this.channels + ".");
   }
 
   /**
    * Event handler onAddStream is called by the MediaToolAdapter
    * before any audio samples are processed. We need to configure
-   * the writer's IStreamCoder with the new bitrate, before we
+   * the writer's IStreamCoder with the new sample rate, before we
    * can resample the raw audio data.
    *
    * @param event Add stream event

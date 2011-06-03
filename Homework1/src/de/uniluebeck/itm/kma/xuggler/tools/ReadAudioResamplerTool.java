@@ -9,8 +9,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Media tool for audio bitrate resampling. This class uses
- * an IAudioResampler to change the sample rate of an audio
+ * Media tool for audio resampling. This class uses an
+ * IAudioResampler to change the sample rate of an audio
  * stream. ReadAudioResamplterTool overrides onAudioSamples
  * from MediaToolAdapter to gain access to the IAudioSamplesEvent,
  * which arrives as the IMediaReader reads a stream.
@@ -43,7 +43,7 @@ public class ReadAudioResamplerTool extends MediaToolAdapter
     this.channels = newChannels;
 
     LOGGER.info("ReadAudioResamplerTool created.");
-    LOGGER.info("New bitrate is " + this.sampleRate + " Bit/s. New channel count is " + this.channels + ".");
+    LOGGER.info("New sample rate is " + this.sampleRate + " Hz. New channel count is " + this.channels + ".");
   }
 
   /**
@@ -68,22 +68,22 @@ public class ReadAudioResamplerTool extends MediaToolAdapter
       this.resampler = IAudioResampler.make(this.channels, samples.getChannels(), this.sampleRate, samples.getSampleRate());
     }
 
-    if (samples.getNumSamples() > 0)
+    if (this.resampler != null && event.getAudioSamples().getNumSamples() > 0)
     {
       // Create buffer for resampled data
-      IAudioSamples temporarySamples = IAudioSamples.make(samples.getNumSamples(), samples.getChannels());
+      IAudioSamples outputSamples = IAudioSamples.make(samples.getNumSamples(), samples.getChannels());
 
       // Resample incoming data
-      resampler.resample(temporarySamples, samples, samples.getNumSamples());
+      resampler.resample(outputSamples, samples, samples.getNumSamples());
 
       // Create new AudioSamplesEvent
-      AudioSamplesEvent samplesEvent = new AudioSamplesEvent(event.getSource(), temporarySamples, event.getStreamIndex());
+      AudioSamplesEvent samplesEvent = new AudioSamplesEvent(event.getSource(), outputSamples, event.getStreamIndex());
 
       // Pass new event to next tool in chain
       super.onAudioSamples(samplesEvent);
 
       // Release temporary buffer
-      temporarySamples.delete();
+      outputSamples.delete();
     }
   }
 }

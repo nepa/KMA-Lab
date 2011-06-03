@@ -6,13 +6,12 @@ import java.util.UUID;
 import javax.swing.JFrame;
 import javax.swing.JFileChooser;
 import java.awt.event.ActionEvent;
-import javax.swing.text.BadLocationException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import de.uniluebeck.itm.kma.xuggler.FileAnalyzer;
 import de.uniluebeck.itm.kma.xuggler.FileConverter;
-import javax.swing.SpinnerNumberModel;
+import javax.swing.ListModel;
 import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
 import javax.swing.UnsupportedLookAndFeelException;
@@ -74,9 +73,9 @@ public class MediaConverterUI extends JFrame
     FileFormatComboBox = new javax.swing.JComboBox();
     VolumePanel = new javax.swing.JPanel();
     VolumeSlider = new javax.swing.JSlider();
-    BitratePanel = new javax.swing.JPanel();
-    BitrateSpinner = new javax.swing.JSpinner();
-    BitrateLabel = new javax.swing.JLabel();
+    SampleRatePanel = new javax.swing.JPanel();
+    SampleRateSpinner = new javax.swing.JSpinner();
+    SampleRateLabel = new javax.swing.JLabel();
     MenuBar = new javax.swing.JMenuBar();
     FileMenu = new javax.swing.JMenu();
     Open = new javax.swing.JMenuItem();
@@ -201,31 +200,31 @@ public class MediaConverterUI extends JFrame
         .addContainerGap(13, Short.MAX_VALUE))
     );
 
-    BitratePanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Change bitrate"));
-    BitratePanel.setPreferredSize(new java.awt.Dimension(250, 92));
+    SampleRatePanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Change sample rate"));
+    SampleRatePanel.setPreferredSize(new java.awt.Dimension(250, 92));
 
-    BitrateSpinner.setModel(new javax.swing.SpinnerNumberModel(44100, 800, 44100, 100));
+    SampleRateSpinner.setModel(new javax.swing.SpinnerListModel(new String[] {"48000", "44100", "32000", "22050", "16000", "11025", "8000"}));
 
-    BitrateLabel.setText("Bit/s");
+    SampleRateLabel.setText("Hz");
 
-    javax.swing.GroupLayout BitratePanelLayout = new javax.swing.GroupLayout(BitratePanel);
-    BitratePanel.setLayout(BitratePanelLayout);
-    BitratePanelLayout.setHorizontalGroup(
-      BitratePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-      .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, BitratePanelLayout.createSequentialGroup()
-        .addContainerGap(26, Short.MAX_VALUE)
-        .addComponent(BitrateSpinner, javax.swing.GroupLayout.PREFERRED_SIZE, 169, javax.swing.GroupLayout.PREFERRED_SIZE)
+    javax.swing.GroupLayout SampleRatePanelLayout = new javax.swing.GroupLayout(SampleRatePanel);
+    SampleRatePanel.setLayout(SampleRatePanelLayout);
+    SampleRatePanelLayout.setHorizontalGroup(
+      SampleRatePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+      .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, SampleRatePanelLayout.createSequentialGroup()
+        .addContainerGap()
+        .addComponent(SampleRateSpinner, javax.swing.GroupLayout.DEFAULT_SIZE, 196, Short.MAX_VALUE)
         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-        .addComponent(BitrateLabel)
+        .addComponent(SampleRateLabel)
         .addContainerGap())
     );
-    BitratePanelLayout.setVerticalGroup(
-      BitratePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-      .addGroup(BitratePanelLayout.createSequentialGroup()
+    SampleRatePanelLayout.setVerticalGroup(
+      SampleRatePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+      .addGroup(SampleRatePanelLayout.createSequentialGroup()
         .addContainerGap()
-        .addGroup(BitratePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-          .addComponent(BitrateLabel)
-          .addComponent(BitrateSpinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+        .addGroup(SampleRatePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+          .addComponent(SampleRateLabel)
+          .addComponent(SampleRateSpinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
         .addContainerGap(35, Short.MAX_VALUE))
     );
 
@@ -275,7 +274,7 @@ public class MediaConverterUI extends JFrame
           .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
             .addComponent(FileFormatPanel, javax.swing.GroupLayout.DEFAULT_SIZE, 241, Short.MAX_VALUE)
             .addGap(18, 18, 18)
-            .addComponent(BitratePanel, javax.swing.GroupLayout.DEFAULT_SIZE, 266, Short.MAX_VALUE)
+            .addComponent(SampleRatePanel, javax.swing.GroupLayout.DEFAULT_SIZE, 266, Short.MAX_VALUE)
             .addGap(18, 18, 18)
             .addComponent(VolumePanel, javax.swing.GroupLayout.DEFAULT_SIZE, 226, Short.MAX_VALUE)))
         .addContainerGap())
@@ -289,7 +288,7 @@ public class MediaConverterUI extends JFrame
         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
           .addComponent(VolumePanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
           .addComponent(FileFormatPanel, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-          .addComponent(BitratePanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+          .addComponent(SampleRatePanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         .addGap(18, 18, 18)
         .addComponent(LogPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         .addContainerGap())
@@ -393,7 +392,7 @@ public class MediaConverterUI extends JFrame
           public void run()
           {
             LOGGER.info("Converter running...");
-            MediaConverterUI.this.swapElementEnabled();
+            MediaConverterUI.this.toggleElementEnabled();
 
             // Set input file and determine file extension
             String input = MediaConverterUI.this.inputFile.getPath();
@@ -412,8 +411,8 @@ public class MediaConverterUI extends JFrame
 
             fileConverter.adjustVolume(input, temp1, VolumeSlider.getValue() / (double)100); // Only cast one value to double!
 
-            int newBitrate = ((SpinnerNumberModel)BitrateSpinner.getModel()).getNumber().intValue();
-            fileConverter.resampleAudio(temp1, temp2, newBitrate, 2);
+            int newSampleRate = Integer.valueOf((String)SampleRateSpinner.getValue());
+            fileConverter.resampleAudio(temp1, temp2, newSampleRate, 2);
 
             File f = new File(temp1);
             f.delete();
@@ -424,7 +423,7 @@ public class MediaConverterUI extends JFrame
             // Analyse output file
             fileAnalyzer.analyzeMediafile(output);
 
-            MediaConverterUI.this.swapElementEnabled();
+            MediaConverterUI.this.toggleElementEnabled();
           }
         });
         //thread.run(); // Run and wait until thread is finished
@@ -432,10 +431,11 @@ public class MediaConverterUI extends JFrame
       }
     }//GEN-LAST:event_SaveActionPerformed
 
-  public void swapElementEnabled()
+  public void toggleElementEnabled()
   {
+    FileNameTextField.setEnabled(!FileNameTextField.isEnabled());
     SelectFileButton.setEnabled(!SelectFileButton.isEnabled());
-    BitrateSpinner.setEnabled(!BitrateSpinner.isEnabled());
+    SampleRateSpinner.setEnabled(!SampleRateSpinner.isEnabled());
     VolumeSlider.setEnabled(!VolumeSlider.isEnabled());
     FileFormatComboBox.setEnabled(!FileFormatComboBox.isEnabled());
     Open.setEnabled(!Open.isEnabled());
@@ -487,9 +487,6 @@ public class MediaConverterUI extends JFrame
     });
   }
   // Variables declaration - do not modify//GEN-BEGIN:variables
-  private javax.swing.JLabel BitrateLabel;
-  private javax.swing.JPanel BitratePanel;
-  private javax.swing.JSpinner BitrateSpinner;
   private javax.swing.JMenuItem Exit;
   private javax.swing.JComboBox FileFormatComboBox;
   private javax.swing.JPanel FileFormatPanel;
@@ -502,6 +499,9 @@ public class MediaConverterUI extends JFrame
   private javax.swing.JMenuBar MenuBar;
   private javax.swing.JMenuItem Open;
   private javax.swing.JFileChooser OutputFileChooser;
+  private javax.swing.JLabel SampleRateLabel;
+  private javax.swing.JPanel SampleRatePanel;
+  private javax.swing.JSpinner SampleRateSpinner;
   private javax.swing.JMenuItem Save;
   private javax.swing.JScrollPane ScrollPane;
   private javax.swing.JButton SelectFileButton;
