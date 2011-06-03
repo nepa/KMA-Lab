@@ -3,6 +3,9 @@
 */nbproject/*
 */build/*
 */dist/*
+*/.settings/*
+*/.classpath
+*/.project
 */test.log
 Videos/*
 Audios/*
