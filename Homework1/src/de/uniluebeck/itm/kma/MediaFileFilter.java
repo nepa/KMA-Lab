@@ -11,8 +11,8 @@ import javax.swing.filechooser.FileFilter;
 class MediaFileFilter extends FileFilter
 {
   /**
-   * Check for multimedia files. Very dirty implementation,
-   * but should be sufficient for some testing.
+   * Check for multimedia files by file extension. Very dirty
+   * implementation, but should be sufficient for testing.
    *
    * @param file File object from JFileChooser dialog
    *
@@ -21,16 +21,22 @@ class MediaFileFilter extends FileFilter
   @Override
   public boolean accept(File file)
   {
-    return file.isDirectory()
-            || file.getAbsolutePath().endsWith(".wav")
-            || file.getAbsolutePath().endsWith(".mp3")
-            || file.getAbsolutePath().endsWith(".mpeg")
-            || file.getAbsolutePath().endsWith(".avi")
-            || file.getAbsolutePath().endsWith(".mov")
-            || file.getAbsolutePath().endsWith(".ogg")
-            || file.getAbsolutePath().endsWith(".au")
-            || file.getAbsolutePath().endsWith(".mp2")
-            || file.getAbsolutePath().endsWith(".mp4");
+    boolean result = false;
+
+    // Supported file types
+    String[] fileExtensions =
+    {
+      ".wav", ".mp3", ".mpeg", ".avi", ".mov", ".wma", ".ogg", ".mp2", ".mp4", ".flac", ".aac", ".au", ".ra"
+    };
+
+    // Check all file extensions...
+    for (String fileExtension: fileExtensions)
+    {
+      result = result || file.getAbsolutePath().endsWith(fileExtension);
+    }
+
+    // ... and also check for directory
+    return file.isDirectory() || result;
   }
 
   /**

@@ -233,7 +233,7 @@ public class MediaConverterUI extends JFrame
     FileFormatPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Change file format"));
     FileFormatPanel.setPreferredSize(new java.awt.Dimension(250, 92));
 
-    FileFormatComboBox.setModel(new javax.swing.DefaultComboBoxModel(new String[] { ".wav", ".mp3", ".mpeg", ".avi", ".mov", ".ogg", ".au", ".mp2", ".mp4" }));
+    FileFormatComboBox.setModel(new javax.swing.DefaultComboBoxModel(new String[] { ".wav", ".mp3", ".mpeg", ".avi", ".mov", ".wma", ".ogg", ".mp2", ".mp4", ".flac", ".aac", ".au", ".ra" }));
 
     javax.swing.GroupLayout FileFormatPanelLayout = new javax.swing.GroupLayout(FileFormatPanel);
     FileFormatPanel.setLayout(FileFormatPanelLayout);
