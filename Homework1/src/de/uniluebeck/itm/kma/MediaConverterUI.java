@@ -11,7 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import de.uniluebeck.itm.kma.xuggler.FileAnalyzer;
 import de.uniluebeck.itm.kma.xuggler.FileConverter;
-import javax.swing.ListModel;
+import javax.swing.JDialog;
 import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
 import javax.swing.UnsupportedLookAndFeelException;
@@ -46,6 +46,7 @@ public class MediaConverterUI extends JFrame
   {
     initComponents();
 
+    // Initialize analyzer and converter
     fileAnalyzer = new FileAnalyzer(LogPane);
     fileConverter = new FileConverter(LogPane);
   }
@@ -63,11 +64,17 @@ public class MediaConverterUI extends JFrame
 
     InputFileChooser = new javax.swing.JFileChooser();
     OutputFileChooser = new javax.swing.JFileChooser();
+    AboutDialog = new javax.swing.JDialog();
+    AboutPanel = new javax.swing.JPanel();
+    CloseAboutButton = new javax.swing.JButton();
+    AboutScrollPane = new javax.swing.JScrollPane();
+    AboutPane = new javax.swing.JTextArea();
+    Copyright = new javax.swing.JLabel();
     InputPanel = new javax.swing.JPanel();
     SelectFileButton = new javax.swing.JButton();
     FileNameTextField = new javax.swing.JTextField();
     LogPanel = new javax.swing.JPanel();
-    ScrollPane = new javax.swing.JScrollPane();
+    LogScrollPane = new javax.swing.JScrollPane();
     LogPane = new javax.swing.JTextPane();
     FileFormatPanel = new javax.swing.JPanel();
     FileFormatComboBox = new javax.swing.JComboBox();
@@ -82,6 +89,8 @@ public class MediaConverterUI extends JFrame
     Save = new javax.swing.JMenuItem();
     Separator = new javax.swing.JPopupMenu.Separator();
     Exit = new javax.swing.JMenuItem();
+    HelpMenu = new javax.swing.JMenu();
+    About = new javax.swing.JMenuItem();
 
     InputFileChooser.setDialogTitle("Open file...");
     InputFileChooser.setFileFilter(new MediaFileFilter());
@@ -89,6 +98,76 @@ public class MediaConverterUI extends JFrame
     OutputFileChooser.setDialogTitle("Save file as...");
     OutputFileChooser.setDialogType(javax.swing.JFileChooser.SAVE_DIALOG);
     OutputFileChooser.setFileFilter(new MediaFileFilter());
+
+    AboutDialog.setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+    AboutDialog.setTitle("About");
+    AboutDialog.setMinimumSize(new java.awt.Dimension(400, 315));
+    AboutDialog.setModal(true);
+    AboutDialog.setResizable(false);
+
+    AboutPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Media Converter"));
+
+    CloseAboutButton.setMnemonic('C');
+    CloseAboutButton.setText("Close");
+    CloseAboutButton.addActionListener(new java.awt.event.ActionListener() {
+      public void actionPerformed(java.awt.event.ActionEvent evt) {
+        CloseAboutButtonActionPerformed(evt);
+      }
+    });
+
+    AboutPane.setColumns(20);
+    AboutPane.setEditable(false);
+    AboutPane.setLineWrap(true);
+    AboutPane.setRows(5);
+    AboutPane.setText("This application is a simple converter for multimedia files. It was created as part of the KMA-Lab in summer term 2011.\n\nFFmpeg libraries and Xuggler API from ConnectSolutions, LLC. are being used for media processing.\n\nhttp://www.ffmpeg.org\nhttp://www.xuggle.com");
+    AboutPane.setWrapStyleWord(true);
+    AboutScrollPane.setViewportView(AboutPane);
+
+    Copyright.setText("(c) 2011: Sascha Seidel");
+
+    javax.swing.GroupLayout AboutPanelLayout = new javax.swing.GroupLayout(AboutPanel);
+    AboutPanel.setLayout(AboutPanelLayout);
+    AboutPanelLayout.setHorizontalGroup(
+      AboutPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+      .addGroup(AboutPanelLayout.createSequentialGroup()
+        .addContainerGap()
+        .addComponent(AboutScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 342, Short.MAX_VALUE)
+        .addContainerGap())
+      .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, AboutPanelLayout.createSequentialGroup()
+        .addGap(25, 25, 25)
+        .addComponent(Copyright)
+        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 72, Short.MAX_VALUE)
+        .addComponent(CloseAboutButton)
+        .addGap(35, 35, 35))
+    );
+    AboutPanelLayout.setVerticalGroup(
+      AboutPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+      .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, AboutPanelLayout.createSequentialGroup()
+        .addContainerGap()
+        .addComponent(AboutScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 199, Short.MAX_VALUE)
+        .addGap(18, 18, 18)
+        .addGroup(AboutPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+          .addComponent(CloseAboutButton)
+          .addComponent(Copyright))
+        .addContainerGap())
+    );
+
+    javax.swing.GroupLayout AboutDialogLayout = new javax.swing.GroupLayout(AboutDialog.getContentPane());
+    AboutDialog.getContentPane().setLayout(AboutDialogLayout);
+    AboutDialogLayout.setHorizontalGroup(
+      AboutDialogLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+      .addGroup(AboutDialogLayout.createSequentialGroup()
+        .addContainerGap()
+        .addComponent(AboutPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+        .addContainerGap())
+    );
+    AboutDialogLayout.setVerticalGroup(
+      AboutDialogLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+      .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, AboutDialogLayout.createSequentialGroup()
+        .addContainerGap()
+        .addComponent(AboutPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+        .addContainerGap())
+    );
 
     setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
     setTitle("Media Converter");
@@ -98,6 +177,7 @@ public class MediaConverterUI extends JFrame
 
     InputPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Input file"));
 
+    SelectFileButton.setMnemonic('S');
     SelectFileButton.setText("Select file...");
     SelectFileButton.addActionListener(new java.awt.event.ActionListener() {
       public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -131,7 +211,7 @@ public class MediaConverterUI extends JFrame
     LogPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Summary"));
 
     LogPane.setEditable(false);
-    ScrollPane.setViewportView(LogPane);
+    LogScrollPane.setViewportView(LogPane);
 
     javax.swing.GroupLayout LogPanelLayout = new javax.swing.GroupLayout(LogPanel);
     LogPanel.setLayout(LogPanelLayout);
@@ -139,14 +219,14 @@ public class MediaConverterUI extends JFrame
       LogPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
       .addGroup(LogPanelLayout.createSequentialGroup()
         .addContainerGap()
-        .addComponent(ScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 735, Short.MAX_VALUE)
+        .addComponent(LogScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 735, Short.MAX_VALUE)
         .addContainerGap())
     );
     LogPanelLayout.setVerticalGroup(
       LogPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
       .addGroup(LogPanelLayout.createSequentialGroup()
         .addContainerGap()
-        .addComponent(ScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 219, Short.MAX_VALUE)
+        .addComponent(LogScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 223, Short.MAX_VALUE)
         .addContainerGap())
     );
 
@@ -228,9 +308,11 @@ public class MediaConverterUI extends JFrame
         .addContainerGap(35, Short.MAX_VALUE))
     );
 
+    FileMenu.setMnemonic('F');
     FileMenu.setText("File");
 
     Open.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_O, java.awt.event.InputEvent.CTRL_MASK));
+    Open.setMnemonic('O');
     Open.setText("Open file...");
     Open.addActionListener(new java.awt.event.ActionListener() {
       public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -240,6 +322,7 @@ public class MediaConverterUI extends JFrame
     FileMenu.add(Open);
 
     Save.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_S, java.awt.event.InputEvent.CTRL_MASK));
+    Save.setMnemonic('S');
     Save.setText("Save file as...");
     Save.addActionListener(new java.awt.event.ActionListener() {
       public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -250,6 +333,7 @@ public class MediaConverterUI extends JFrame
     FileMenu.add(Separator);
 
     Exit.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_Q, java.awt.event.InputEvent.CTRL_MASK));
+    Exit.setMnemonic('x');
     Exit.setText("Exit");
     Exit.addActionListener(new java.awt.event.ActionListener() {
       public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -259,6 +343,21 @@ public class MediaConverterUI extends JFrame
     FileMenu.add(Exit);
 
     MenuBar.add(FileMenu);
+
+    HelpMenu.setMnemonic('H');
+    HelpMenu.setText("Help");
+
+    About.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_A, java.awt.event.InputEvent.CTRL_MASK));
+    About.setMnemonic('A');
+    About.setText("About");
+    About.addActionListener(new java.awt.event.ActionListener() {
+      public void actionPerformed(java.awt.event.ActionEvent evt) {
+        AboutActionPerformed(evt);
+      }
+    });
+    HelpMenu.add(About);
+
+    MenuBar.add(HelpMenu);
 
     setJMenuBar(MenuBar);
 
@@ -378,7 +477,10 @@ public class MediaConverterUI extends JFrame
    */
     private void SaveActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_SaveActionPerformed
     {//GEN-HEADEREND:event_SaveActionPerformed
+      // Preselect input file name
       OutputFileChooser.setSelectedFile(this.inputFile);
+
+      // Get return value from JFileChooser
       int returnValue = OutputFileChooser.showSaveDialog(this);
 
       // Check whether valid file name was provided
@@ -387,8 +489,14 @@ public class MediaConverterUI extends JFrame
         // Create output file
         outputFile = new File(OutputFileChooser.getSelectedFile().getPath());
 
+        // Start new thread for file conversion! This is good
+        // practice, because otherwise the user interface would
+        // be locked during media processing.
         Thread thread = new Thread(new Runnable()
         {
+          /**
+           * Run separate thread for processing of multimedia files.
+           */
           public void run()
           {
             LOGGER.info("Converter running...");
@@ -399,38 +507,117 @@ public class MediaConverterUI extends JFrame
             String fileExtension = input.substring(input.lastIndexOf("."));
 
             // Generate random temporary file names
-            String temp1 = MediaConverterUI.this.outputFile.getParent()
-                    + (MediaConverterUI.this.outputFile.getParent().endsWith(System.getProperty("file.separator"))
-                    ? "" : System.getProperty("file.separator")) + "temp_" + UUID.randomUUID().toString() + fileExtension;
-            String temp2 = MediaConverterUI.this.outputFile.getParent()
-                    + (MediaConverterUI.this.outputFile.getParent().endsWith(System.getProperty("file.separator"))
-                    ? "" : System.getProperty("file.separator")) + "temp_" + UUID.randomUUID().toString() + fileExtension;
+            String temp1 = createRandomFileName(fileExtension);
+            String temp2 = createRandomFileName(fileExtension);
 
             // Set output file name
             String output = MediaConverterUI.this.outputFile.getPath() + FileFormatComboBox.getSelectedItem().toString();
 
-            fileConverter.adjustVolume(input, temp1, VolumeSlider.getValue() / (double)100); // Only cast one value to double!
+            // Step 1: Adjust volume (increase or decrease)
+            double volumeMultiplier = VolumeSlider.getValue() / (double)100; // Only cast one value to double!
+            fileConverter.adjustVolume(input, temp1, volumeMultiplier);
 
+            // Step 2: Do audio resampling (change sampling rate)
             int newSampleRate = Integer.valueOf((String)SampleRateSpinner.getValue());
             fileConverter.resampleAudio(temp1, temp2, newSampleRate, 2);
+            deleteTempFile(temp1);
 
-            File f = new File(temp1);
-            f.delete();
+            // Step 3: Do transcoding (file type conversion)
             fileConverter.transcode(temp2, output);
-            f = new File(temp2);
-            f.delete();
+            deleteTempFile(temp2);
 
             // Analyse output file
             fileAnalyzer.analyzeMediafile(output);
 
             MediaConverterUI.this.toggleElementEnabled();
           }
+
+          /**
+           * Helper method to generate random file name. We will
+           * use it for the creation of temporary files during
+           * media processing.
+           *
+           * @param fileExtension File extension suffix (e.g. ".wav")
+           */
+          private String createRandomFileName(String fileExtension)
+          {
+            // This might look a bit tricky, so here is what we do:
+            //
+            //   1. Get the file path.
+            //   2. Check whether there is a slash at the end of it.
+            //   3. We use "file.separator" to get the platform-specific
+            //      delimiter (e.g. Windows uses "\", whereas UNIX uses "/").
+            //   4. If there already is a delimiter at the end of path,
+            //      we are fine, otherwise we add one (this varies between
+            //      different JVM implementations and operating systems).
+            //   5. We add "temp_" to indicate that this is a temporary file.
+            //   6. We generate a random UUID, which is a 16 byte hexadecimal.
+            //   7. And we finally append the given file extension.
+            return MediaConverterUI.this.outputFile.getParent()
+                    + (MediaConverterUI.this.outputFile.getParent().endsWith(System.getProperty("file.separator"))
+                    ? "" : System.getProperty("file.separator"))
+                    + "temp_" + UUID.randomUUID().toString() + fileExtension;
+          }
+
+          /**
+           * Helper method for deletion of temporary files.
+           *
+           * @param fileName Name of file for deletion
+           */
+          private void deleteTempFile(String fileName)
+          {
+            File file = new File(fileName);
+
+            if (file.exists())
+            {
+              file.delete();
+            }
+          }
         });
-        //thread.run(); // Run and wait until thread is finished
-        thread.start(); // Continue immediately
+        //thread.run(); // Run and wait until thread is finished (blocking)
+        thread.start(); // Continue immediately (non-blocking)
       }
     }//GEN-LAST:event_SaveActionPerformed
 
+  /**
+   * Action performed, when "About" item is selected in the help
+   * menu. This option will bring up a simple about dialog with
+   * a box containing some information about the application.
+   *
+   * @param evt ActionEvent
+   */
+    private void AboutActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_AboutActionPerformed
+    {//GEN-HEADEREND:event_AboutActionPerformed
+      // Create dialog if necessary
+      if (AboutDialog == null)
+      {
+        AboutDialog = new JDialog(this);
+      }
+
+      // Show about dialog (centered on main window)
+      AboutDialog.setLocationRelativeTo(this);
+      AboutDialog.setVisible(true);
+    }//GEN-LAST:event_AboutActionPerformed
+
+  /**
+   * Action performed, when the "Close" button in the about box
+   * is hit. This will dispose the dialog and free all resources.
+   * So basically the dialog window will be recreated every time
+   * the user opens it.
+   * 
+   * @param evt ActionEvent
+   */
+    private void CloseAboutButtonActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_CloseAboutButtonActionPerformed
+    {//GEN-HEADEREND:event_CloseAboutButtonActionPerformed
+      AboutDialog.dispose();
+    }//GEN-LAST:event_CloseAboutButtonActionPerformed
+
+  /**
+   * Helper method to toggle the enabled-flag of some GUI elements.
+   * We will call it before and after media processing, so to give
+   * the user a visual feedback that the application is working
+   * (and to prevent the user from loading a new file meanwhile).
+   */
   public void toggleElementEnabled()
   {
     FileNameTextField.setEnabled(!FileNameTextField.isEnabled());
@@ -451,6 +638,9 @@ public class MediaConverterUI extends JFrame
   {
     try
     {
+      // Change look and feel to Nimbus if available. - We don't
+      // want our application to look like one of those old Motif
+      // GUIs. *urg*
       for (LookAndFeelInfo info: UIManager.getInstalledLookAndFeels())
       {
         if ("Nimbus".equals(info.getName()))
@@ -462,19 +652,23 @@ public class MediaConverterUI extends JFrame
     }
     catch (UnsupportedLookAndFeelException e)
     {
-      // handle exception
+      // Handle exception...
+      LOGGER.error(e.getMessage());
     }
     catch (ClassNotFoundException e)
     {
-      // handle exception
+      // Handle exception...
+      LOGGER.error(e.getMessage());
     }
     catch (InstantiationException e)
     {
-      // handle exception
+      // Handle exception...
+      LOGGER.error(e.getMessage());
     }
     catch (IllegalAccessException e)
     {
-      // handle exception
+      // Handle exception... Yeah, we really should...
+      LOGGER.error(e.getMessage());
     }
 
     // Launch application
@@ -486,16 +680,26 @@ public class MediaConverterUI extends JFrame
       }
     });
   }
+  // <editor-fold defaultstate="collapsed" desc="Generated Code">
   // Variables declaration - do not modify//GEN-BEGIN:variables
+  private javax.swing.JMenuItem About;
+  private javax.swing.JDialog AboutDialog;
+  private javax.swing.JTextArea AboutPane;
+  private javax.swing.JPanel AboutPanel;
+  private javax.swing.JScrollPane AboutScrollPane;
+  private javax.swing.JButton CloseAboutButton;
+  private javax.swing.JLabel Copyright;
   private javax.swing.JMenuItem Exit;
   private javax.swing.JComboBox FileFormatComboBox;
   private javax.swing.JPanel FileFormatPanel;
   private javax.swing.JMenu FileMenu;
   private javax.swing.JTextField FileNameTextField;
+  private javax.swing.JMenu HelpMenu;
   private javax.swing.JFileChooser InputFileChooser;
   private javax.swing.JPanel InputPanel;
   private javax.swing.JTextPane LogPane;
   private javax.swing.JPanel LogPanel;
+  private javax.swing.JScrollPane LogScrollPane;
   private javax.swing.JMenuBar MenuBar;
   private javax.swing.JMenuItem Open;
   private javax.swing.JFileChooser OutputFileChooser;
@@ -503,10 +707,10 @@ public class MediaConverterUI extends JFrame
   private javax.swing.JPanel SampleRatePanel;
   private javax.swing.JSpinner SampleRateSpinner;
   private javax.swing.JMenuItem Save;
-  private javax.swing.JScrollPane ScrollPane;
   private javax.swing.JButton SelectFileButton;
   private javax.swing.JPopupMenu.Separator Separator;
   private javax.swing.JPanel VolumePanel;
   private javax.swing.JSlider VolumeSlider;
   // End of variables declaration//GEN-END:variables
+  // </editor-fold>
 }
