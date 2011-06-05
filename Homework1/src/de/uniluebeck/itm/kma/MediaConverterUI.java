@@ -12,9 +12,9 @@ import org.slf4j.LoggerFactory;
 import de.uniluebeck.itm.kma.xuggler.FileAnalyzer;
 import de.uniluebeck.itm.kma.xuggler.FileConverter;
 import javax.swing.JDialog;
+import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
-import javax.swing.UnsupportedLookAndFeelException;
 
 /**
  * Simple Media Converter application, as requested in
@@ -499,6 +499,39 @@ public class MediaConverterUI extends JFrame
            */
           public void run()
           {
+            try
+            {
+              // Adjust volume, change sampling rate and do transcoding
+              doMediaProcessing();
+            }
+            // Catch all exceptions that Xuggler might throw
+            catch (RuntimeException e)
+            {
+              LOGGER.error("Error during media processing: " + e.getMessage());
+
+              LoggingHelper.appendAndScroll(LogPane, "Media processing aborted due to error.");
+
+              JOptionPane.showMessageDialog(MediaConverterUI.this,
+                      "Error during media processing. Check log for detailed information.",
+                      "Ooops!",
+                      JOptionPane.ERROR_MESSAGE);
+            }
+            finally
+            {
+              // Always reset user interface
+              MediaConverterUI.this.toggleElementEnabled();
+            }
+          }
+
+          /**
+           * This method does the actual media processing. That is
+           * adjusting the volume, changing the sampling rate and
+           * finally transcoding the input file to a different type.
+           *
+           * @throws RuntimeException Error during media processing
+           */
+          private void doMediaProcessing() throws RuntimeException
+          {
             LOGGER.info("Converter running...");
             MediaConverterUI.this.toggleElementEnabled();
 
@@ -528,8 +561,6 @@ public class MediaConverterUI extends JFrame
 
             // Analyse output file
             fileAnalyzer.analyzeMediafile(output);
-
-            MediaConverterUI.this.toggleElementEnabled();
           }
 
           /**
@@ -650,24 +681,9 @@ public class MediaConverterUI extends JFrame
         }
       }
     }
-    catch (UnsupportedLookAndFeelException e)
+    catch (Exception e)
     {
       // Handle exception...
-      LOGGER.error(e.getMessage());
-    }
-    catch (ClassNotFoundException e)
-    {
-      // Handle exception...
-      LOGGER.error(e.getMessage());
-    }
-    catch (InstantiationException e)
-    {
-      // Handle exception...
-      LOGGER.error(e.getMessage());
-    }
-    catch (IllegalAccessException e)
-    {
-      // Handle exception... Yeah, we really should...
       LOGGER.error(e.getMessage());
     }
 

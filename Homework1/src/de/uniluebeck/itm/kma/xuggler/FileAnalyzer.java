@@ -2,7 +2,6 @@ package de.uniluebeck.itm.kma.xuggler;
 
 import com.xuggle.xuggler.Global;
 import com.xuggle.xuggler.ICodec;
-import javax.swing.text.BadLocationException;
 
 import javax.swing.JTextPane;
 
@@ -10,9 +9,7 @@ import com.xuggle.xuggler.IContainer;
 import com.xuggle.xuggler.IPacket;
 import com.xuggle.xuggler.IStream;
 import com.xuggle.xuggler.IStreamCoder;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import de.uniluebeck.itm.kma.LoggingHelper;
 
 /**
  * Analyzer for multimedia files. Outputs information to
@@ -22,9 +19,6 @@ import org.slf4j.LoggerFactory;
  */
 public class FileAnalyzer
 {
-  /** Logger object for debug output */
-  private static final Logger LOGGER = LoggerFactory.getLogger(FileAnalyzer.class);
-
   /** JTextPane object for analyzer output */
   private JTextPane logPane;
 
@@ -70,16 +64,7 @@ public class FileAnalyzer
    */
   private void log(String textToAppend)
   {
-    try
-    {
-      this.logPane.getDocument().insertString(this.logPane.getDocument().getLength(),
-              textToAppend + System.getProperty("line.separator"), null);
-      this.logPane.setCaretPosition(this.logPane.getDocument().getLength()); // Auto-scrolling
-    }
-    catch (BadLocationException e)
-    {
-      LOGGER.info(e.getMessage());
-    }
+    LoggingHelper.appendAndScroll(this.logPane, textToAppend);
   }
 
   /**

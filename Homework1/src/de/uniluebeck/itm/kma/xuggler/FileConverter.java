@@ -1,10 +1,6 @@
 package de.uniluebeck.itm.kma.xuggler;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import javax.swing.JTextPane;
-import javax.swing.text.BadLocationException;
 
 import com.xuggle.mediatool.IMediaReader;
 import com.xuggle.mediatool.IMediaTool;
@@ -14,6 +10,7 @@ import com.xuggle.xuggler.ICodec;
 import com.xuggle.xuggler.IContainer;
 import com.xuggle.xuggler.IPacket;
 import com.xuggle.xuggler.IStreamCoder;
+import de.uniluebeck.itm.kma.LoggingHelper;
 
 import de.uniluebeck.itm.kma.xuggler.tools.ReadAudioResamplerTool;
 import de.uniluebeck.itm.kma.xuggler.tools.VolumeAdjustTool;
@@ -27,9 +24,6 @@ import de.uniluebeck.itm.kma.xuggler.tools.WriteAudioResamplerTool;
  */
 public class FileConverter
 {
-  /** Logger object for debug output */
-  private static final Logger LOGGER = LoggerFactory.getLogger(FileConverter.class);
-
   /** JTextPane object for analyzer output */
   private JTextPane logPane;
 
@@ -70,16 +64,7 @@ public class FileConverter
    */
   private void log(String textToAppend)
   {
-    try
-    {
-      this.logPane.getDocument().insertString(this.logPane.getDocument().getLength(),
-              textToAppend + System.getProperty("line.separator"), null);
-      this.logPane.setCaretPosition(this.logPane.getDocument().getLength()); // Auto-scrolling
-    }
-    catch (BadLocationException e)
-    {
-      LOGGER.info(e.getMessage());
-    }
+    LoggingHelper.appendAndScroll(this.logPane, textToAppend);
   }
 
   /**
@@ -90,8 +75,10 @@ public class FileConverter
    * @param intputFile Input file name
    * @param outputFile Output file name
    * @param adjustmentAmount Amount of adjustment
+   *
+   * @throws RuntimeException Error during media processing
    */
-  public void adjustVolume(String intputFile, String outputFile, double adjustmentAmount)
+  public void adjustVolume(String intputFile, String outputFile, double adjustmentAmount) throws RuntimeException
   {
     this.log("============================================================");
     this.log("");
@@ -109,16 +96,9 @@ public class FileConverter
     adjustVolume.addListener(writer);
 
     // Read and decode packets
-    try
+    while (reader.readPacket() == null)
     {
-      while (reader.readPacket() == null)
-      {
-        // Do nothing intentionally!
-      }
-    }
-    catch (Exception e)
-    {
-      LOGGER.error(e.toString());
+      // Do nothing intentionally!
     }
 
     // Safely close reader and writer
@@ -141,8 +121,10 @@ public class FileConverter
    * @param outputFile Output file name
    * @param newSampleRate New sample rate
    * @param newChannels New amount of channels
+   *
+   * @throws RuntimeException Error during media processing
    */
-  public void resampleAudio(String inputFile, String outputFile, int newSampleRate, int newChannels)
+  public void resampleAudio(String inputFile, String outputFile, int newSampleRate, int newChannels) throws RuntimeException
   {
     this.log("Resampling audio to " + newSampleRate + " Hz (" + newChannels + " channels)...");
 
@@ -160,16 +142,9 @@ public class FileConverter
     writer.addListener(writerResampler);
 
     // Read and decode packets
-    try
+    while (reader.readPacket() == null)
     {
-      while (reader.readPacket() == null)
-      {
-        // Do nothing intentionally!
-      }
-    }
-    catch (Exception e)
-    {
-      LOGGER.error(e.toString());
+      // Do nothing intentionally!
     }
 
     // Safely close reader and writer
@@ -193,8 +168,10 @@ public class FileConverter
    *
    * @param inputFile Input file name
    * @param outputFile Output file name
+   *
+   * @throws RuntimeException Error during media processing
    */
-  public void transcode(String inputFile, String outputFile)
+  public void transcode(String inputFile, String outputFile) throws RuntimeException
   {
     this.log("Transcoding input to new file format...");
 
@@ -206,16 +183,9 @@ public class FileConverter
     reader.addListener(writer);
 
     // Read and decode packets
-    try
+    while (reader.readPacket() == null)
     {
-      while (reader.readPacket() == null)
-      {
-        // Do nothing intentionally!
-      }
-    }
-    catch (Exception e)
-    {
-      LOGGER.error(e.toString());
+      // Do nothing intentionally!
     }
 
     // Safely close reader and writer
