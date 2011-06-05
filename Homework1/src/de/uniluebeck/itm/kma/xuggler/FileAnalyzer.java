@@ -150,7 +150,7 @@ public class FileAnalyzer
       {
         this.log("Media file type: \t\tAudio");
 
-        this.log("Sample rate: \t\t" + coder.getSampleRate());
+        this.log("Sample rate: \t\t" + coder.getSampleRate() + " Hz");
 
         this.log("Number of channels: \t\t" + coder.getChannels());
 
