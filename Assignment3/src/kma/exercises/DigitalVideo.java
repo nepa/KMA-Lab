@@ -143,15 +143,15 @@ public class DigitalVideo {
 		
 		// Video Settings for CODEC_ID_FLV1
 		// ------------------------------------
-		// String containerFormat = "flv";		
-		// vs.vcodec = ICodec.ID.CODEC_ID_FLV1;		
-		// vs.vscaleFactor = 0.5;	
-		// vs.vbitrate = 100000;
+		String containerFormat = "flv";		
+		vs.vcodec = ICodec.ID.CODEC_ID_FLV1;		
+		vs.vscaleFactor = 0.5;	
+		vs.vbitrate = 100000;
 		
 		// Video Settings for CODEC_ID_RAWVIDEO
 		// ------------------------------------
-		String containerFormat = "avi";
-		vs.vcodec = ICodec.ID.CODEC_ID_RAWVIDEO;
+		// String containerFormat = "avi";
+		// vs.vcodec = ICodec.ID.CODEC_ID_RAWVIDEO;
 		
 		// Transcode the video file
 		transcodeVideo(inputFilePath, transcodePath, containerFormat, vs);
