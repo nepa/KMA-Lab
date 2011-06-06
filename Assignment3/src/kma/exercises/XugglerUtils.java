@@ -235,6 +235,7 @@ public class XugglerUtils {
 		container.close();
 	}
 	
+	
 	/*
 	 * Close and safely release all resources related to the incoming IContainer
 	 */
