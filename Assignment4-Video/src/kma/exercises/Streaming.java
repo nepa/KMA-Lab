@@ -6,8 +6,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.xuggle.xuggler.Global;
-import com.xuggle.xuggler.IAudioResampler;
-import com.xuggle.xuggler.IAudioSamples;
 import com.xuggle.xuggler.ICodec;
 import com.xuggle.xuggler.IContainer;
 import com.xuggle.xuggler.IContainerFormat;
@@ -15,6 +13,8 @@ import com.xuggle.xuggler.IPacket;
 import com.xuggle.xuggler.IRational;
 import com.xuggle.xuggler.IStream;
 import com.xuggle.xuggler.IStreamCoder;
+import com.xuggle.xuggler.IVideoPicture;
+import com.xuggle.xuggler.IVideoResampler;
 
 /**
  * OVERVIEW The Streaming class transcodes media files using techniques from the
@@ -65,34 +65,29 @@ public class Streaming {
 	private static IContainer inContainer = null;
 	private static IStream inStream = null;
 	private static IStreamCoder inCoder = null;
-	private static IAudioSamples inSamples = null;
+	private static IVideoPicture inVideoPicture = null;
 
 	// Setup local variables for the output IContainer
 	private static IContainer outContainer = null;
 	private static IStream outStream = null;
 	private static IStreamCoder outCoder = null;
-
-	private static IAudioSamples outSamples = null;
-	private static IAudioSamples reSamples = null;
-	private static IAudioResampler audioSampler = null;
-	private static int audioStreamIndex = 0;
+	private static IVideoPicture outVideoPicture = null;
+	private static IVideoResampler outVSampler = null;
+	private static int videoStreamIndex = 0;
 
 	/*
-	 * AudioSettings is a simple 'struct' like inner class that is used to hold
-	 * encoding settings. The defaults force the encoder to match source
-	 * settings.
+	 * VideoSettings is a simple 'struct' like inner class that is used to hold 
+	 * encoding settings. The defaults force the encoder to match source settings.
 	 * 
-	 * Note: This type of class should only be used internally for convenience
-	 * since it breaks encapsulation by exposing internal variables.
+	 * Note: This type of class should only be used internally for convenience since
+	 * it breaks encapsulation by exposing internal variables.
 	 */
-	public static class AudioSettings {
-		// Note: defaults force the encoder to match source settings
-		ICodec.ID acodec;
-		int astream = -1;
-		int aquality = 0; // 0 is full quality
-		int sampleRate = 0;
-		int channels = 0;
-		int abitrate = 0;
+	private static class VideoSettings {
+		ICodec.ID vcodec;
+		int vbitrate = 0;
+		int vbitratetolerance = 0;
+		int vquality = 0; // 0 is full quality
+		double vscaleFactor = 1.0;
 	}
 
 	/**
@@ -101,9 +96,14 @@ public class Streaming {
 	public static void main(String[] args) {
 		log.info("Starting tests...");
 
-		AudioSettings as = new AudioSettings();
-		String containerFormat = "flv";
-		as.acodec = ICodec.ID.CODEC_ID_MP3;
+		VideoSettings vs = new VideoSettings();
+		
+		// Video Settings for CODEC_ID_FLV1
+		// ------------------------------------
+		String containerFormat = "flv";		
+		vs.vcodec = ICodec.ID.CODEC_ID_FLV1;		
+		vs.vscaleFactor = 0.5;	
+		vs.vbitrate = 100000;
 
 		/*
 		 * ----------------------------------------------------------------------
@@ -157,33 +157,31 @@ public class Streaming {
 		String serverPath = "rtmp://141.83.68.80:10001/live/" + lastName;
 		// String serverPath = "rtmp://85.114.135.105:1935/rtplive/" + lastName;
 
-		stream(inputFilePath, serverPath, containerFormat, as);
+		stream(inputFilePath, serverPath, containerFormat, vs);
 		log.info("Tests complete!");
 	}
 
 	/*
-	 * --------------------------------------------------------------------------
-	 * --------- !!! LAB EXERCISE !!!
-	 * --------------------------------------------
-	 * --------------------------------------- Study the 'setupStreams' method
-	 * in detail to gain an understanding of how to setup streams using
-	 * Xuggler's advanced API. While the advanced API is considerably more
-	 * complex than the MediaTool API, it provides low-level access to
-	 * IContainer, IStream, and IStreamCoder settings.
+	 * -----------------------------------------------------------------------------------
+	 * !!! LAB EXERCISE !!!
+	 * -----------------------------------------------------------------------------------
+	 * Review the 'setupStreams' method in detail to gain an understanding of how to setup
+	 * streams using Xuggler's advanced API. While the advanced API is considerably more
+	 * complex than the MediaTool API, it provides low-level access to IContainer, IStream,
+	 * and IStreamCoder settings.
 	 * 
-	 * As you study this method, note the following: 1. The output IContainer
-	 * format can vary from the underlying codec's default container format
-	 * (e.g. including MP3 audio within a Flash FLV container).
-	 * 
+	 * As you study this method, note the following:
+	 * 1. The output IContainer format can vary from the underlying codec's default 
+	 *    container format (e.g. including MP3 audio within a Flash FLV container). 
+	 *    
 	 * 2. The encoding codec can be specified directly, including its bit-rate.
 	 * 
-	 * 3. We have precise control over the output sample rate through an
-	 * IAudioResampler.
+	 * 3. We have precise control over the output video's size through an IVideoResampler.
 	 * 
-	 * 4. Direct access to IAudioSamples is supported.
+	 * 4. Direct access to IVideoPicture buffers is supported (providing direct access to
+	 *    individual video frames).
 	 */
-	private static void setupStreams(String inputURL, String outputURL,
-			String containerFormat, AudioSettings as) {
+	private static void setupStreams(String inputURL, String outputURL, String containerFormat, VideoSettings vs) {
 		log.info("Setting up streams...");
 
 		// Create a local return value (for error checking)
@@ -199,22 +197,18 @@ public class Streaming {
 			throw new RuntimeException("Could not open: " + inputURL);
 
 		/*
-		 * If there was a specified containerFormat (i.e. containerFormat !=
-		 * null) then create a specific IContainerFormat for use in creating the
-		 * output IContainer
+		 * If there was a specified containerFormat (i.e. containerFormat != null) then
+		 * create a specific IContainerFormat for use in creating the output IContainer
 		 * 
-		 * Note: This is useful if you need to use a particular container format
-		 * with a given media type (e.g. including MP3 audio within a Flash FLV
-		 * container)
+		 * Note: This is useful if you need to use a particular container format with a
+		 * given media type (e.g. including MP3 audio within a Flash FLV container)
 		 */
 		IContainerFormat oFmt = null;
 		if (containerFormat != null) {
 			oFmt = IContainerFormat.make();
 			retval = oFmt.setOutputFormat(containerFormat, outputURL, null);
 			if (retval < 0)
-				throw new RuntimeException(
-						"Coul not find output container format: "
-								+ containerFormat);
+				throw new RuntimeException("Could not find output container format: " + containerFormat);
 		}
 
 		/*
@@ -224,11 +218,10 @@ public class Streaming {
 		 */
 		retval = outContainer.open(outputURL, IContainer.Type.WRITE, oFmt);
 		if (retval < 0)
-			throw new RuntimeException("could not open output url: "
-					+ outputURL);
+			throw new RuntimeException("could not open output url: " + outputURL);
 
 		/*
-		 * Now let's search through the streams to find the first audio stream
+		 * Now let's search through the streams to find the first video stream
 		 */
 		for (int i = 0; i < inContainer.getNumStreams(); i++) {
 
@@ -236,8 +229,8 @@ public class Streaming {
 			inStream = inContainer.getStream(i);
 
 			/*
-			 * Next, get the input stream coder. Xuggler will set up all sorts
-			 * of defaults on this StreamCoder for you (such as the audio sample
+			 * Next, get the input stream coder. Xuggler will set up all sorts of
+			 * defaults on this StreamCoder for you (such as the audio sample
 			 * rate) when you open it.
 			 * 
 			 * You can create IStreamCoders yourself using
@@ -246,111 +239,123 @@ public class Streaming {
 			 */
 			inCoder = inStream.getStreamCoder();
 
-			// Find out what Codec Xuggler guessed the input stream was encoded
-			// with.
+			// Find out what Codec Xuggler guessed the input stream was encoded with.
 			ICodec.Type cType = inCoder.getCodecType();
 
-			// Check for an audio stream, ignore otherwise
-			if (cType == ICodec.Type.CODEC_TYPE_AUDIO) {
-				log.info("Found an audio stream!");
-				audioStreamIndex = i;
+			// Check for a video stream, ignore otherwise
+			if (cType == ICodec.Type.CODEC_TYPE_VIDEO) {
+				log.info("Found a video stream!");
+				videoStreamIndex = i;
 
-				// Since we found an audio stream, add a new stream to our
-				// output IContainer
+				// Since we found a video stream, add a new stream to our output IContainer
 				outStream = outContainer.addNewStream(i);
 
-				// Grab the output stream coder from the 'outStream' and set its
-				// codec and quality
+				// Grab the output stream coder from the 'outStream' and set its codec and quality
 				outCoder = outStream.getStreamCoder();
-
-				if (as.acodec != null) {
-					outCoder.setCodec(as.acodec);
+				if (vs.vcodec != null) {
+					outCoder.setCodec(vs.vcodec);
+					outCoder.setGlobalQuality(0);
 				} else {
 					/*
-					 * Looks like the user didn't specify an output coder. So we
-					 * ask Xuggler to guess an appropriate output coded based on
-					 * the URL and the container format.
+					 * Looks like the user didn't specify an output coder. 
+					 * So we ask Xuggler to guess an appropriate output coded based on the URL
+					 * and the container format.
 					 */
-					ICodec codec = ICodec.guessEncodingCodec(oFmt, null,
-							outputURL, null, cType);
+					ICodec codec = ICodec.guessEncodingCodec(oFmt, null, outputURL, null, cType);
 					if (codec == null)
-						throw new RuntimeException("Could not guess " + cType
-								+ " encoder for: " + outputURL);
+						throw new RuntimeException("Could not guess " + cType + " encoder for: " + outputURL);
 					outCoder.setCodec(codec);
 				}
 
 				/*
-				 * In general a IStreamCoder encoding audio needs to know: 1) A
-				 * ICodec to use. 2) The sample rate and number of channels of
-				 * the audio. Most everything else can be defaulted.
+				 * In general a IStreamCoder encoding video needs to know:
+				 * 1) A ICodec to use.
+				 * 2) The Width and Height of the Video.
+				 * 3) The pixel format (e.g. IPixelFormat.Type#YUV420P) of
+				 * the video data. Most everything else can be defaulted.
 				 */
+				
+				/*
+				 * If the user didn't specify a bit-rate for encoding, then
+				 * just use the same bit-rate as the input.
+				 */
+				if (vs.vbitrate == 0)
+					vs.vbitrate = inCoder.getBitRate();
+				outCoder.setBitRate(vs.vbitrate);
+				
+				// vbitratetolerance indicates the ability to tolerate variations in the rate that bits pass a point.
+				if (vs.vbitratetolerance > 0)
+					outCoder.setBitRateTolerance(vs.vbitratetolerance);
+
+				int oWidth = inCoder.getWidth();
+				int oHeight = inCoder.getHeight();
+
+				if (oHeight <= 0 || oWidth <= 0)
+					throw new RuntimeException("could not find width or height in url: " + inputURL);
 
 				/*
-				 * If the user didn't specify a sample rate for encoding, then
-				 * just use the same sample rate as the input.
+				 * For this program we don't allow the user to specify the pixel
+				 * format type, so we force the output to be the same as the input.
 				 */
-				if (as.sampleRate == 0)
-					as.sampleRate = inCoder.getSampleRate();
-				outCoder.setSampleRate(as.sampleRate);
+				outCoder.setPixelType(inCoder.getPixelType());
 
-				/*
-				 * If the user didn't specify a bit-rate, then just use the same
-				 * bit-rate as the input.
-				 */
-				if (as.abitrate == 0)
-					as.abitrate = inCoder.getBitRate();
-				outCoder.setBitRate(as.abitrate);
-
-				/*
-				 * If the user didn't specify the number of channels, just
-				 * assume we're keeping the same number of channels as the
-				 * source.
-				 */
-				if (as.channels == 0)
-					as.channels = inCoder.getChannels();
-				outCoder.setChannels(as.channels);
-
-				/*
-				 * And set the quality (which defaults to 0, or highest, if the
-				 * user doesn't tell us one).
-				 */
-				outCoder.setGlobalQuality(as.aquality);
-
-				/*
-				 * Now check if our output channels or sample rate differ from
-				 * our input channels or sample rate.
-				 * 
-				 * If they do, we're going to need to re-sample the input audio
-				 * to be in the right format to output.
-				 */
-				if (outCoder.getChannels() != inCoder.getChannels()
-						|| outCoder.getSampleRate() != inCoder.getSampleRate()) {
+				// Setup video scaling, if needed
+				if (vs.vscaleFactor != 1.0) {
+					
 					/*
-					 * Create an audio re-sampler to do that job.
+					 * In this case, it looks like the output video requires
+					 * re-scaling, so we create a IVideoResampler to do that
+					 * dirty work.
 					 */
-					audioSampler = IAudioResampler.make(outCoder.getChannels(),
-							inCoder.getChannels(), outCoder.getSampleRate(),
-							inCoder.getSampleRate());
-					if (audioSampler == null) {
+					oWidth = (int) (oWidth * vs.vscaleFactor);
+					oHeight = (int) (oHeight * vs.vscaleFactor);
+
+					outVSampler = IVideoResampler.make(oWidth, oHeight, outCoder.getPixelType(),
+							inCoder.getWidth(), inCoder.getHeight(), inCoder.getPixelType());
+					if (outVSampler == null) {
 						throw new RuntimeException(
-								"Could not open audio resampler for stream: "
-										+ i);
+								"This version of Xuggler does not support video resampling " + i);
 					}
 				} else {
-					audioSampler = null;
+					outVSampler = null;
 				}
+				
+				outCoder.setHeight(oHeight);
+				outCoder.setWidth(oWidth);
+
+				outCoder.setFlag(IStreamCoder.Flags.FLAG_QSCALE, true);
+				outCoder.setGlobalQuality(vs.vquality);
 
 				/*
-				 * Finally, create some buffers for the input and output audio
-				 * themselves. We'll use these repeatedly during the 'stream'
-				 * method.
+				 * TimeBases are important, especially for Video. In general
+				 * Audio encoders will assume that any new audio happens
+				 * IMMEDIATELY after any prior audio finishes playing. But for
+				 * video, we need to make sure it's being output at the right
+				 * rate.
+				 * 
+				 * In this case we make sure we set the same time base as the
+				 * input, and then we don't change the time stamps of any
+				 * IVideoPictures.
+				 * 
+				 * But take my word that time stamps are tricky, and this only
+				 * touches the envelope. The good news is, it's easier in
+				 * Xuggler than some other systems.
 				 */
-				inSamples = IAudioSamples.make(1024, inCoder.getChannels());
-				outSamples = IAudioSamples.make(1024, outCoder.getChannels());
+				IRational num = null;
+				num = inCoder.getFrameRate();
+				outCoder.setFrameRate(num);
+				outCoder.setTimeBase(IRational.make(num.getDenominator(), num.getNumerator()));
+				num = null;
+
+				// Allocate buffers for us to store decoded and re-sample video pictures.
+				inVideoPicture = IVideoPicture.make(inCoder.getPixelType(), inCoder.getWidth(),
+						inCoder.getHeight());
+				outVideoPicture = IVideoPicture.make(outCoder.getPixelType(), outCoder.getWidth(),
+						outCoder.getHeight());
 
 				/*
-				 * Now, once you've set up all the parameters on the
-				 * StreamCoder, you must open() them so they can do work.
+				 * Now, once you've set up all the parameters on the StreamCoder,
+				 * you must open() them so they can do work.
 				 * 
 				 * They will return an error if not configured correctly, so we
 				 * check for that here.
@@ -358,16 +363,13 @@ public class Streaming {
 				if (outCoder != null) {
 					retval = outCoder.open();
 					if (retval < 0)
-						throw new RuntimeException(
-								"Could not open output encoder for stream: "
-										+ i);
+						throw new RuntimeException("Could not open output encoder for stream: " + i);
 					retval = inCoder.open();
 					if (retval < 0)
-						throw new RuntimeException(
-								"Could not open input decoder for stream: " + i);
+						throw new RuntimeException("Could not open input decoder for stream: " + i);
 				}
 
-				// Since we found an audio stream, break out of the loop
+				// Since we found a video stream, break out of the loop
 				break;
 			} else {
 				log.warn("Ignoring input stream {} of type {}", i, cType);
@@ -384,8 +386,7 @@ public class Streaming {
 		 */
 		retval = outContainer.writeHeader();
 		if (retval < 0)
-			throw new RuntimeException("Could not write header for: "
-					+ outputURL);
+			throw new RuntimeException("Could not write header for: " + outputURL);
 
 		log.info("Finished setting up streams!");
 	}
@@ -403,9 +404,9 @@ public class Streaming {
 	 * Note: There is one code-block below that should be completed by the
 	 * student.
 	 */
-	public static void stream(String inputURL, String serverPath, String containerFormat, AudioSettings as) {
+	public static void stream(String inputURL, String serverPath, String containerFormat, VideoSettings vs) {
 		// Setup the input and output streams
-		setupStreams(inputURL, serverPath, containerFormat, as);
+		setupStreams(inputURL, serverPath, containerFormat, vs);
 
 		log.info("Starting to stream to: {}", serverPath);
 
@@ -435,7 +436,7 @@ public class Streaming {
 			 * 'setupStreams' method called above
 			 */
 			i = iPacket.getStreamIndex();
-			if (i == audioStreamIndex) {
+			if (i == videoStreamIndex) {
 
 				// Grab the appropriate IStream from the 'inContainer'
 				IStream stream = inContainer.getStream(i);
@@ -462,10 +463,11 @@ public class Streaming {
 
 				// Verify that the stream is indeed audio
 				ICodec.Type cType = inCoder.getCodecType();
-				if (cType == ICodec.Type.CODEC_TYPE_AUDIO) {
+				if (cType == ICodec.Type.CODEC_TYPE_VIDEO) {
 
 					// Setup necessary local variables
 					int offset = 0;
+					IVideoPicture outFrame = null;
 
 					/*
 					 * Decoding audio works by taking the data in the packet,
@@ -523,27 +525,56 @@ public class Streaming {
 						 */
 						// ===================================================================================
 						// *** YOUR CODE HERE ***
-						retval = inCoder
-								.decodeAudio(inSamples, iPacket, offset);
-
-						if (retval < 0) {
-							throw new RuntimeException("Could not decode audio samples from iPacket into inSamples buffer.");
+						retval = inCoder.decodeVideo(inVideoPicture, iPacket, offset);
+						
+						if (retval < 0)
+						{
+							throw new RuntimeException("Could not decode video frame from iPacket into inVideoPicture buffer.");
 						}
-
+						
 						offset += retval;
-
-						if (inSamples.getTimeStamp() != Global.NO_PTS) {
-							inSamples.setTimeStamp(inSamples.getTimeStamp() - tsOffset);
+						
+						if (inVideoPicture.getTimeStamp() != Global.NO_PTS)
+						{
+							inVideoPicture.setTimeStamp(inVideoPicture.getTimeStamp() - tsOffset);
 						}
-
-						// Check whether re-sampling was requested
-						if (audioSampler != null
-								&& inSamples.getNumSamples() > 0) {
-							audioSampler.resample(reSamples, inSamples, inSamples.getNumSamples());
-
-							outSamples = reSamples;
-						} else {
-							outSamples = inSamples;
+						
+						// Check whether inVideoPicture in complete
+						if (inVideoPicture.isComplete())
+						{
+							// Check whether re-sizing is requested
+							if (outVSampler != null)
+							{
+								// Resample inVideoPicture
+								retval = outVSampler.resample(outVideoPicture, inVideoPicture);
+								
+								if (retval < 0)
+								{
+									throw new RuntimeException("Could not resample inVideoPicture.");
+								}
+								
+								outFrame = outVideoPicture;
+							}
+							else
+							{								
+								outFrame = inVideoPicture;
+							}
+						
+							// Set default quality
+							if (outFrame != null)
+							{
+								outFrame.setQuality(0);
+							}
+							else
+							{
+								throw new RuntimeException("The outFrame is null.");
+							}
+							
+							retval = outCoder.encodeVideo(oPacket, outFrame, 0);
+							if (retval < 0)
+							{
+								throw new RuntimeException("Could not encode output video.");
+							}						
 						}
 						// ===================================================================================
 
@@ -566,20 +597,9 @@ public class Streaming {
 						 * But in any case, the following loop encodes the
 						 * samples we have into packets.
 						 */
-						int numSamplesConsumed = 0;
-						while (numSamplesConsumed < outSamples.getNumSamples()) {
-							retval = outCoder.encodeAudio(oPacket, outSamples,
-									numSamplesConsumed);
-							if (retval <= 0)
-								throw new RuntimeException(
-										"Could not encode any audio: " + retval);
-							/*
-							 * Increment the number of samples consumed, so that
-							 * the next time through this loop we encode new
-							 * audio
-							 */
-							numSamplesConsumed += retval;
-							if (oPacket.isComplete()) {
+						// Write encoded oPacket buffer to the outContainer
+						if (oPacket.isComplete())
+						{
 								/*
 								 * ----------------------------------------------
 								 * ------------------------------------- !!! LAB
@@ -614,7 +634,7 @@ public class Streaming {
 								 * 'StreamingHelper.fixProblem' is called within
 								 * the encoding process.
 								 */
-								StreamingHelper.fixProblem(inSamples);
+								StreamingHelper.fixProblem(inVideoPicture);
 
 								/*
 								 * If we got a complete packet out of the
@@ -628,7 +648,7 @@ public class Streaming {
 							}
 						}
 						// ===================================================================================
-					}
+					
 				} else {
 					// Ignore other stream types
 					log.trace("ignoring packet of type: {}", cType);
@@ -677,7 +697,7 @@ public class Streaming {
 		private static long systemClockStartTime = 0;
 		private static long firstTimestampInStream = Global.NO_PTS;
 
-		public static void fixProblem(IAudioSamples samples) {
+		public static void fixProblem(IVideoPicture samples) {
 			/*
 			 * ------------------------------------------------------------------
 			 * ----------------- !!! LAB EXERCISE !!!
