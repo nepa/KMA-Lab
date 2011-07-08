@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Application 
+	xmlns:mx="http://www.adobe.com/2006/mxml" 
+	layout="absolute"
+	creationComplete="onCreationComplete(event)">
+	<mx:Script source="applicationCode.as"/>
+		
+	<!--
+	/* ===================================================================================
+	* !!! LAB EXERCISE !!!
+	* ===================================================================================
+	* This section is to declare the UI component for your application. You may add or change those controls according to your application
+	* needs.
+	* 	Hints:
+	*		- you may also use the "Design" perspective on the upper left corner to position your controls and choose the best layout 
+	*		for your application.
+	*		- notice that the first method to be called is "onCreationComplete" in the "applicationCode.as"
+	*/
+	
+	// ===================================================================================
+	// *** YOUR CODE HERE ***	
+	// ===================================================================================
+	-->
+
+	<mx:Button x="45" y="300" label="Play" id="playBtn"/>
+	<mx:Button x="123" y="300" label="Pause" id="pauseBtn"/>
+	<mx:Button x="201" y="300" label="Resume" id="resumeBtn"/>
+	<mx:Button id="togglePauseBtn" x="123" y="329" width="148" label="Pause/Resume"/>
+</mx:Application>

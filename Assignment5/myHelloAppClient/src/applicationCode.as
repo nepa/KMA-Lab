@@ -8,7 +8,7 @@ package
 	import flash.net.Responder;
 	import flash.net.SharedObject;
 	import flash.display.Sprite;
-    import flash.text.TextField;
+	import flash.text.TextField;
 	
 //	import mx.core.UIComponent;	
 //	import mx.controls.Alert;
