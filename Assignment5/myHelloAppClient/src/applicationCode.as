@@ -10,9 +10,10 @@ package
 	import flash.display.Sprite;
 	import flash.text.TextField;
 	
-//	import mx.core.UIComponent;	
-//	import mx.controls.Alert;
-//	import mx.events.FlexEvent;
+	// We cannot use MX extensions on Linux
+	// import mx.core.UIComponent;	
+	// import mx.controls.Alert;
+	// import mx.events.FlexEvent;
 		
 	public class applicationCode extends Sprite
 	{

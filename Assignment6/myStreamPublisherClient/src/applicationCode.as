@@ -12,6 +12,7 @@ package
 	import flash.display.Sprite;
 	import flash.text.TextField;
 	
+	// We cannot use MX extensions on Linux
 	// import mx.controls.Alert;
 	// import mx.core.UIComponent;
 	// import mx.events.FlexEvent;
@@ -97,14 +98,12 @@ package
 		 * 		- make sure you have the right GUI "graphical user interface" for your client application
 		 * 		- feel free to add any important / cool feature
 		 * 					
-		 * */
-		
-		
+		 * */				
 		
 		// network properties
 		private var connection: NetConnection;
 		private var inStream: NetStream;
-		private var videoURL: String = "KMA_sample_video1.flv"; // Video name without file extension
+		private var videoURL: String = "KMA_sample_video1.flv"; // Video name with or without extension (if *.flv)
 		
 		// device properties
 		
@@ -117,30 +116,15 @@ package
 		
 		public function applicationCode()
 		{
+			// ===================================================================================
+			// *** YOUR CODE HERE ***
             var tf:TextField = new TextField();
             tf.text = "Constructor of applicationCode was called.";
             tf.width = 400;
             addChild(tf);
             		
 			onCreationComplete();
-			
-//			// ===================================================================================
-//			// *** YOUR CODE HERE ***
-//			var tf:TextField = new TextField();
-//			tf.text = "Event onCreationComplete was called.";
-//			tf.width = 400;
-//			tf.y = 10;
-//			addChild(tf);
-//			
-//			// Establish the connection with the server-side application (using the RTMP protocol)
-//			connection = new NetConnection();
-//			connection.connect("rtmp://localhost/Assignment6");
-//			//connection.client = this;
-//			
-//			connection.addEventListener(NetStatusEvent.NET_STATUS, onConnectionNetStatus);					  
-//			// ===================================================================================			
-//		
-//			connection.client = this;
+			// ===================================================================================			
 		}
 		
 		/*
@@ -218,7 +202,7 @@ package
 			{
 				conStatusLabel.text = "Successful connection.";
 				
-				setupVideo();
+				setupVideo(); // Setup video on successful connection
 			}
 			else if (event.info.code == "NetConnection.Connect.Failed")
 			{
@@ -283,8 +267,7 @@ package
 			// ===================================================================================			
 		}
 		
-		// "setupVideo" method to setup the stage to play the incomming streams from the server
-		
+		// "setupVideo" method to setup the stage to play the incomming streams from the server		
 		private function setupVideo():void{
 			
 			/* -----------------------------------------------------------------------------------
@@ -311,32 +294,11 @@ package
 			
 			inStream = new NetStream(connection);			
 			inStream.addEventListener(NetStatusEvent.NET_STATUS, onConnectionNetStatus);
-			// inStream.addEventListener(NetStatusEvent.NET_STATUS, ns_onMetaData);
 			
 			inVideo = new Video();			
 			inVideo.attachNetStream(inStream);
 			
-			this.addChild(inVideo);
-			
-			// inStream.bufferTime = 30;
-			
-			// inStream.play(videoURL);
-			
-			// inVideoWrapper = new UIComponent();			
-			/// inVideoWrapper.addChild(inVideo);
-			
-//			addChild(inVideo);
-//			
-//			inStream.bufferTime = 30; // set stream buffer to 5 seconds
-//			
-//			inStream.play(videoURL);
-//			
-//			inVideo.width = 100;
-//			inVideo.height = 100;
-//			
-//			inVideo.x = 0;
-//			inVideo.y = 0;
-			
+			this.addChild(inVideo); // No video container here, we add to Sprite directly			
 			// ===================================================================================						
 		}
 		
@@ -374,6 +336,7 @@ package
 			
 			inStream.play(videoURL);
 			
+			// Call event handler, if metadata is sent on stream
 			inStream.client = {};
 			inStream.client.onMetaData = ns_onMetaData;	
 			// ===================================================================================		
@@ -488,40 +451,58 @@ package
 			var tf:TextField = new TextField();
 			tf.text = metaDataString;
 			tf.width = 400;
-			tf.y = 270;
-			addChild(tf);	
+			tf.y = 270; // Display string below video
+			addChild(tf);
 			// ===================================================================================		
 		}
 		
+		// helper method to draw play button
 		private function drawPlayButton():void {
 			var textLabel:TextField = new TextField();
 		    var button:Sprite = new Sprite();
+		    
+		    // Draw button
 			button.graphics.clear();
 			button.graphics.beginFill(0xD4D4D4); // grey color
-			button.graphics.drawRoundRect(0, 300, 80, 25, 10, 10); // x, y, width, height, ellipseW, ellipseH
+			button.graphics.drawRoundRect(0, 320, 80, 25, 10, 10); // x, y, width, height, ellipseW, ellipseH
 			button.graphics.endFill();
+			
+			// Create label
 			textLabel.text = "Play";
 			textLabel.x = 10;
-			textLabel.y = 300;
+			textLabel.y = 320;
 			textLabel.selectable = false;
+			
+			// Add label to button and button to Sprite
 			button.addChild(textLabel);
 			addChild(button);
+			
+			// Add listener for click event
 			button.addEventListener(MouseEvent.MOUSE_DOWN, onClickPlayBtn);
 		}
 		
+		// helper method to draw pause button
 		private function drawPauseButton():void {
 			var textLabel:TextField = new TextField();
 		    var button:Sprite = new Sprite();
+		    
+		    // Draw button
 			button.graphics.clear();
 			button.graphics.beginFill(0xD4D4D4); // grey color
-			button.graphics.drawRoundRect(100, 300, 80, 25, 10, 10); // x, y, width, height, ellipseW, ellipseH
+			button.graphics.drawRoundRect(100, 320, 80, 25, 10, 10); // x, y, width, height, ellipseW, ellipseH
 			button.graphics.endFill();
+			
+			// Create label
 			textLabel.text = "Pause";
 			textLabel.x = 110;
-			textLabel.y = 300;
+			textLabel.y = 320;
 			textLabel.selectable = false;
+			
+			// Add label to button and button to Sprite
 			button.addChild(textLabel);
 			addChild(button);
+			
+			// Add listener for click event
 			button.addEventListener(MouseEvent.MOUSE_DOWN, onClickPauseBtn);
 		}		
 	}
