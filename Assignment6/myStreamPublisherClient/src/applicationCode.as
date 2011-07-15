@@ -1,3 +1,24 @@
+/**
+ * /////////////////////////////////////////////////////////////////////////////////////////
+ * 
+ * Important usage information:
+ * 
+ *   The flash user controls are a bit difficult to handle at runtime. If you hit
+ *   the play button once, playback will start after some time. Hitting the pause
+ *   or toggle pause button then, will result in slowly stopping the movie. That
+ *   means playback will continue for a couple of seconds (but pause internally).
+ *
+ *   Pressing the resume or toggle pause button again, will then make the movie
+ *   go back a couple of frames (where you pressed pause initially) and resume
+ *   playback from there. So everything works as expected, except for the fact
+ *   that the visual playback does not stopp instantly. So there is always some
+ *   delay if you hit one of the buttons. - Keep this in mind.
+ * 
+ *   Furthermore playback speed increases after pausing, due to some buffering issues.
+ * 
+ * /////////////////////////////////////////////////////////////////////////////////////////  
+ */
+
 package
 {
 	// Imports
@@ -103,7 +124,7 @@ package
 		// network properties
 		private var connection: NetConnection;
 		private var inStream: NetStream;
-		private var videoURL: String = "KMA_sample_video1.flv"; // Video name with or without extension (if *.flv)
+		private var videoURL: String = "KMA_sample_video2.flv"; // Video name with or without extension (if *.flv)
 		
 		// device properties
 		
@@ -165,7 +186,9 @@ package
 			
 			// Create user interface
 			drawPlayButton();
-			drawPauseButton();					  
+			drawPauseButton();
+			drawResumeButton();
+			drawTogglePauseButton();					  
 			// ===================================================================================								
 		}
 		
@@ -451,12 +474,13 @@ package
 			var tf:TextField = new TextField();
 			tf.text = metaDataString;
 			tf.width = 400;
+			tf.height = 30; // Cannot press buttons below otherwise!!!
 			tf.y = 270; // Display string below video
 			addChild(tf);
 			// ===================================================================================		
 		}
 		
-		// helper method to draw play button
+		// Helper method to draw play button
 		private function drawPlayButton():void {
 			var textLabel:TextField = new TextField();
 		    var button:Sprite = new Sprite();
@@ -481,7 +505,7 @@ package
 			button.addEventListener(MouseEvent.MOUSE_DOWN, onClickPlayBtn);
 		}
 		
-		// helper method to draw pause button
+		// Helper method to draw pause button
 		private function drawPauseButton():void {
 			var textLabel:TextField = new TextField();
 		    var button:Sprite = new Sprite();
@@ -504,6 +528,56 @@ package
 			
 			// Add listener for click event
 			button.addEventListener(MouseEvent.MOUSE_DOWN, onClickPauseBtn);
-		}		
+		}
+		
+		// Helper method to draw resume button
+		private function drawResumeButton():void {
+			var textLabel:TextField = new TextField();
+		    var button:Sprite = new Sprite();
+		    
+		    // Draw button
+			button.graphics.clear();
+			button.graphics.beginFill(0xD4D4D4); // grey color
+			button.graphics.drawRoundRect(200, 320, 80, 25, 10, 10); // x, y, width, height, ellipseW, ellipseH
+			button.graphics.endFill();
+			
+			// Create label
+			textLabel.text = "Resume";
+			textLabel.x = 210;
+			textLabel.y = 320;
+			textLabel.selectable = false;
+			
+			// Add label to button and button to Sprite
+			button.addChild(textLabel);
+			addChild(button);
+			
+			// Add listener for click event
+			button.addEventListener(MouseEvent.MOUSE_DOWN, onClickResumeBtn);
+		}
+		
+		// Helper method to draw toggle pause button
+		private function drawTogglePauseButton():void {
+			var textLabel:TextField = new TextField();
+		    var button:Sprite = new Sprite();
+		    
+		    // Draw button
+			button.graphics.clear();
+			button.graphics.beginFill(0xD4D4D4); // grey color
+			button.graphics.drawRoundRect(300, 320, 80, 25, 10, 10); // x, y, width, height, ellipseW, ellipseH
+			button.graphics.endFill();
+			
+			// Create label
+			textLabel.text = "Toggle pause";
+			textLabel.x = 310;
+			textLabel.y = 320;
+			textLabel.selectable = false;
+			
+			// Add label to button and button to Sprite
+			button.addChild(textLabel);
+			addChild(button);
+			
+			// Add listener for click event
+			button.addEventListener(MouseEvent.MOUSE_DOWN, onClickTogglePauseBtn);
+		}
 	}
 }
